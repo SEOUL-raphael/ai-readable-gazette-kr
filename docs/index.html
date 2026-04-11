@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Readable Gazette KR — 대한민국 관보 보정 코퍼스</title>
+<meta name="description" content="대한민국 관보 128,403건 OCR 보정 파생 코퍼스. 사전 기반 단어 보정 (v1~v7).">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>AI Readable Gazette KR</h1>
+    <p class="tag">대한민국 관보 · OCR 보정 파생 코퍼스 · v7</p>
+    <p class="stats" id="stats">loading…</p>
+    <nav class="headnav">
+      <a href="#" data-view="browse" class="active">둘러보기</a>
+      <a href="#" data-view="about">소개</a>
+      <a href="https://github.com/hosungseo/ai-readable-gazette-kr" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app" class="wrap">
+
+  <section id="view-browse" class="view active">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="tabs">
+          <button data-tab="dates" class="active">날짜</button>
+          <button data-tab="inst">기관</button>
+        </div>
+        <input type="search" id="filter" placeholder="필터…">
+        <div id="list-dates" class="list active"></div>
+        <div id="list-inst" class="list"></div>
+      </aside>
+
+      <section class="main">
+        <div id="docs-header" class="docs-header"></div>
+        <div id="docs-list" class="docs-list">
+          <p class="hint">왼쪽에서 날짜 또는 기관을 선택하세요.</p>
+        </div>
+        <article id="reader" class="reader" hidden>
+          <div class="reader-head">
+            <button id="back-btn">← 목록</button>
+            <div class="reader-meta">
+              <span id="reader-date"></span> ·
+              <span id="reader-inst"></span>
+            </div>
+            <a id="reader-raw" href="#" target="_blank" rel="noopener">raw</a>
+          </div>
+          <h2 id="reader-title"></h2>
+          <div id="reader-body" class="markdown"></div>
+        </article>
+      </section>
+    </div>
+  </section>
+
+  <section id="view-about" class="view">
+    <article class="prose">
+      <h2>이 저장소는 무엇인가</h2>
+      <p>
+        대한민국 관보는 PDF로만 제공됩니다. 이 저장소는 2020–2026 관보 약
+        13만 건을 Markdown으로 변환한 뒤 OCR에서 깨진 글자를 사전 기반으로 보정한
+        <strong>파생 코퍼스</strong>입니다. 원본은
+        <a href="https://github.com/hosungseo/gov-gazette-md" target="_blank" rel="noopener">gov-gazette-md</a>
+        에 있고, 이 저장소는 거기에 한 겹 얹은 읽기 전용 개선본입니다.
+      </p>
+
+      <h3>2단 구조 원칙</h3>
+      <pre>readable-final   (원본형, 건드리지 않음)
+     │
+     │  build_readable_corrected.py
+     ▼
+derived/readable-corrected   (단어 보정 파생본)</pre>
+
+      <h3>보정 방법</h3>
+      <p>
+        1475개 날짜 폴더 × 약 80개 문서 평균 = 128,403개 관보 md 전량을 통과시킵니다.
+        보정 파이프라인은 다섯 개 phrase 사전 → regex 패턴 → 전역 단일 문자 치환 →
+        phrase 재적용의 2-pass 구조입니다.
+      </p>
+      <p>
+        전역 단일 문자 치환은 이웃 문자 분포를 샘플 스캔으로 검증한 후에만 추가합니다.
+        충돌하는 phrase 규칙은 선행 사전에 등록해서 2-pass 파이프라인이 순서를 보장합니다.
+      </p>
+
+      <h3>검증된 치환 (v4~v7)</h3>
+      <table class="tbl">
+        <thead><tr><th>버전</th><th>단일 문자</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><td>v4</td><td>옄→위, 뮈→번, 픸→호</td><td>이웃 분포 단일 매핑</td></tr>
+          <tr><td>v5</td><td>왴→이, 앀→외, 솤→스, 큌→테, 롴→르, 퐄→프</td><td>외래어·조사 일관</td></tr>
+          <tr><td>v6</td><td>뵄→비</td><td>뵄고·설비 계열</td></tr>
+          <tr><td>v7</td><td>죁→직</td><td>직업·직물 계열</td></tr>
+        </tbody>
+      </table>
+
+      <h3>regex 패턴</h3>
+      <ul>
+        <li><code>(\d{4})끄 → \1년</code> — 연도 접미어, 약 40,000건</li>
+        <li><code>(\d+)묀뢬미(퀰|만) → \1개월미만</code></li>
+      </ul>
+
+      <h3>중요 정책</h3>
+      <p>
+        <strong>한 글자 전역 치환은 이웃 분포 검증 후에만</strong>. 과거 벀→모친,
+        릨→부친 무작정 전역 치환으로 "모친동산", "고지거모친" 같은 과보정
+        사고가 있었습니다. 현재는 1000+ 샘플에서 단일 매핑 수렴 확인 +
+        phrase 선행 등록으로 충돌을 방지합니다.
+      </p>
+
+      <h3>원칙</h3>
+      <ul class="hollow">
+        <li>source first</li>
+        <li>readable second</li>
+        <li>hype never</li>
+        <li>trust over dashboard</li>
+        <li>archive over campaign</li>
+      </ul>
+
+      <h3>라이선스</h3>
+      <p>
+        원천 관보는 대한민국 정부 공공데이터입니다. 보정 스크립트 및 파생 코퍼스는
+        공익 목적 재배포를 전제로 합니다.
+      </p>
+    </article>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="https://github.com/hosungseo/ai-readable-gazette-kr" target="_blank" rel="noopener">ai-readable-gazette-kr</a> ·
+      <a href="https://github.com/hosungseo/gov-gazette-md" target="_blank" rel="noopener">원천: gov-gazette-md</a> ·
+      <a href="https://github.com/hosungseo/ai-readable-government" target="_blank" rel="noopener">리더: ai-readable-government</a>
+    </p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
