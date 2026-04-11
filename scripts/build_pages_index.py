@@ -29,6 +29,47 @@ BLOB_BASE = (
 
 FNAME_RE = re.compile(r'^(\d{3})_([^_]+)_(.+)\.md$')
 
+# Title prefix → sub-jurisdiction extraction.
+# The upstream gazette filename labels every document with a "broad publisher"
+# (e.g., 강원도) even when the actual issuing entity is a 기초자치단체 (e.g., 화천군).
+# We extract the sub-jurisdiction from the title prefix and combine it with the
+# parent label to give browse/search the right granularity.
+SUB_JURISDICTION_RE = re.compile(
+    r'^([가-힣]{1,8}?(?:특별시|광역시|특별자치시|특별자치도|시|군|구))'
+    r'(?:청)?'
+    r'(?:고시|공고|훈령|규칙|령|공시|예고|공포|결정|입법예고|행정예고|규정변경예고)'
+)
+
+# Tokens that look like locations but are not (mostly 군/공/육 + 군 = military branches).
+SUB_JURISDICTION_BLACKLIST = {'해군', '공군', '육군', '아군', '적군', '본군', '아공'}
+
+
+def derive_publisher(filename_publisher: str, title_underscored: str) -> str:
+    """Combine the gazette filename publisher with a sub-jurisdiction
+    extracted from the title prefix.
+
+    Examples:
+      ('강원도', '화천군고시제2021_559호_…')   → '강원도 화천군'
+      ('강원도', '강원도고시제2020_412호_…')   → '강원도'
+      ('국토교통부', '국토교통부공고제2026_…')  → '국토교통부'
+      ('서울특별시', '강서구공고제2025_…')      → '서울특별시 강서구'
+      ('국방부', '해군공고제2023_…')          → '국방부' (해군 blacklisted)
+
+    Returns the original filename_publisher when no sub-jurisdiction can
+    be confidently extracted.
+    """
+    if title_underscored.startswith(filename_publisher):
+        return filename_publisher
+    m = SUB_JURISDICTION_RE.match(title_underscored)
+    if not m:
+        return filename_publisher
+    sub = m.group(1)
+    if sub in SUB_JURISDICTION_BLACKLIST:
+        return filename_publisher
+    if sub == filename_publisher or filename_publisher.startswith(sub):
+        return filename_publisher
+    return f'{filename_publisher} {sub}'
+
 # ---------- institution classification ----------
 #
 # Buckets are broad on purpose. 1,426 distinct institutions in the corpus,
@@ -63,29 +104,32 @@ PUBLIC_INST_KWS = ('공단', '공사', '재단', '진흥원', '관리원', '연�
 
 
 def classify(inst: str) -> str:
-    if inst in LEGISLATIVE:
+    # For compound labels (e.g. "강원도 화천군") use the parent for ministry
+    # / legislative / judicial detection so a sub-jurisdiction doesn't get
+    # mis-classified by the broader label.
+    parent = inst.split(' ', 1)[0]
+
+    if parent in LEGISLATIVE:
         return '입법'
-    if any(k in inst for k in JUDICIAL_KWS):
+    if any(k in parent for k in JUDICIAL_KWS):
         return '사법'
-    if inst in CENTRAL_MINISTRIES:
+    if parent in CENTRAL_MINISTRIES:
         return '중앙부처'
-    if any(k in inst for k in EDU_KWS):
+    if any(k in parent for k in EDU_KWS):
         return '교육'
-    # Local government detection: ends with typical local suffix
+    # Local government detection: parent ends with broad local suffix
     for suf in ('특별시', '광역시', '특별자치시', '특별자치도'):
-        if inst.endswith(suf):
+        if parent.endswith(suf):
             return '지자체'
-    if re.search(r'(도|시|군|구|읍|면|동)(교육청|교육지원청|청|)$', inst):
-        # could be local or central; prefer local if not already known central
-        if not any(inst.startswith(m) for m in CENTRAL_MINISTRIES):
+    if re.search(r'(도|시|군|구|읍|면|동)(교육청|교육지원청|청|)$', parent):
+        if not any(parent.startswith(m) for m in CENTRAL_MINISTRIES):
             return '지자체'
-    if any(inst.endswith(k) for k in ('공단', '공사', '재단', '진흥원', '관리원',
-                                       '연구원', '연구소')):
+    if any(parent.endswith(k) for k in ('공단', '공사', '재단', '진흥원', '관리원',
+                                         '연구원', '연구소')):
         return '공공기관'
-    if inst.endswith('청') and inst not in CENTRAL_MINISTRIES:
-        # Smaller agencies not in central ministries list — still central-ish
+    if parent.endswith('청') and parent not in CENTRAL_MINISTRIES:
         return '중앙부처'
-    if inst.endswith(('부', '처', '위원회')) and inst not in CENTRAL_MINISTRIES:
+    if parent.endswith(('부', '처', '위원회')) and parent not in CENTRAL_MINISTRIES:
         return '중앙부처'
     return '기타'
 
@@ -96,12 +140,20 @@ CATEGORY_ORDER = ['중앙부처', '지자체', '사법', '입법', '교육', '�
 # ---------- filename ----------
 
 def parse_filename(name: str):
+    """Returns (serial, derived_publisher, display_title) or None.
+
+    The "derived publisher" combines the gazette's broad publisher
+    (filename position 2) with the sub-jurisdiction extracted from the
+    title prefix when the issuing entity is a 기초자치단체. This produces
+    labels like "강원도 화천군" instead of collapsing into "강원도".
+    """
     m = FNAME_RE.match(name)
     if not m:
         return None
-    serial, inst, rest = m.group(1), m.group(2), m.group(3)
-    title = rest.replace('_', ' ')
-    return serial, inst, title
+    serial, broad_publisher, rest_underscored = m.group(1), m.group(2), m.group(3)
+    publisher = derive_publisher(broad_publisher, rest_underscored)
+    title = rest_underscored.replace('_', ' ')
+    return serial, publisher, title
 
 
 # ---------- main ----------

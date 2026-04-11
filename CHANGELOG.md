@@ -6,6 +6,98 @@ and the derived corpus (`derived/readable-corrected/`).
 Format follows Keep-a-Changelog (<https://keepachangelog.com/>), though entries
 are coarse and grouped by dictionary version rather than strict semver.
 
+## [v8] — 2026-04-12
+
+### Fixed (corpus quality)
+
+- **Broken image references** — upstream OCR pipeline emitted ~3,000,000
+  markdown image links (`![image N](<doc>_images/imageFileN.png)`) across
+  ~15,674 documents (12.2% of corpus), but the actual image binaries were
+  never copied into this corpus. The reader showed broken icons; downstream
+  consumers saw dead links.
+
+  v8 rewrites these in-place to a visible italic marker:
+  `![image 3](...)` → `*[원본 이미지 3]*`
+
+  Implementation: regex `_BROKEN_IMG_RE` matching `![alt](path/_images/*.png|jpg|jpeg|gif|svg|webp)`,
+  replacement function `_img_marker()` that strips the redundant "image N"
+  prefix and emits a clean Korean marker. Runs first in `fix_text()` so
+  the markers don't tangle with subsequent text replacements.
+
+  External image links (`http://...png`) are NOT touched — only broken
+  upstream local references are rewritten.
+
+### Fixed (parser / index)
+
+- **Institution parser** — `parse_filename()` previously took the
+  filename's second underscore-delimited token as the publisher, which
+  collapsed sub-jurisdictions into their parent. e.g., a 화천군 document
+  filed as `003_강원도_화천군고시...` was indexed as just "강원도", masking
+  ~500 sub-jurisdiction documents in the institution tree and search.
+
+  v8 introduces `derive_publisher()` which combines the broad publisher
+  with a sub-jurisdiction extracted from the title prefix:
+  - `('강원도', '화천군고시제2021_…')` → "강원도 화천군"
+  - `('서울특별시', '강서구공고제2025_…')` → "서울특별시 강서구"
+  - `('국방부', '해군공고제2023_…')` → "국방부" (해군 blacklisted)
+
+  `classify()` now reads the parent half of compound labels for ministry
+  detection so "행정안전부 부산광역시" stays under 중앙부처, not 지자체.
+
+  Result: institution tree gains ~213 new compound entries; users can
+  browse 마포구 / 성동구 / 천안시 / 화천군 etc. as distinct.
+
+### Fixed (security)
+
+- **XSS in markdown rendering** — `marked.parse()` output was being
+  injected into the reader via `innerHTML` without sanitization. Since
+  the reader fetches raw markdown from a public corpus at runtime, any
+  document with `<script>` or inline event handlers would have executed
+  in the visitor's browser at the github.io origin.
+
+  v8 adds DOMPurify (CDN, pinned to v3.0.11) and sanitizes the marked
+  output before injection. Forbids `<script> <iframe> <object> <embed>
+  <form>` and `onerror onload onclick onmouseover` etc. Preserves
+  legitimate markdown structure (headings, tables, lists, code, links).
+  Falls back to a regex-based stripper if the CDN fails to load.
+
+### Fixed (build hygiene)
+
+- **Stale output pruning** — full builds (no `--limit`, no `--only`) now
+  remove output files whose source no longer exists, plus sweep empty
+  output directories. Partial runs still don't prune (they would delete
+  unrelated dates).
+- **`day-*` skip** — explicit ingestion-time skip for `day-YYYY-MM-DD/`
+  duplicate directories. The maintainer's earlier manual deletion is now
+  enforced by the build script itself, so re-running the pipeline can't
+  reintroduce the duplicates.
+
+### Mobile UI
+
+- Touch targets across the reader sidebar, doc rows, year jumper, category
+  pills, reader nav, institution tree now meet the iOS HIG 44px minimum on
+  small screens
+- New `@media (max-width: 480px)` block: spotlight collapses to single
+  column, reader nav stacks vertically, smaller header type
+- 820px breakpoint expanded to cover institution tree, recent list, etc.
+
+### Build script CLI
+
+- `build_readable_corrected.py` now accepts `--src`, `--out`, `--limit`,
+  `--only`. Source resolution order: `--src` arg → `$GAZETTE_SRC` env var
+  → `<repo>/readable-final/` → sibling readable-final discovery.
+  Help text generalized — no upstream repo names hardcoded.
+
+### Self-containment / decoupling
+
+- README and Pages About no longer link to other repositories. Origin
+  is documented as 행정안전부 전자관보 (`gwanbo.go.kr`) directly so this
+  repo can stand alone for community sharing.
+- Footer links updated: own repo + gwanbo.go.kr + NOTICE.md + keyboard
+  shortcuts. Cross-repo links removed.
+- Reproducibility note added to README explaining that no external
+  private dependency is required to use, build, or extend this corpus.
+
 ## [v7] — 2026-04-11
 
 Last round. Hit diminishing returns — most top residual tokens below threshold

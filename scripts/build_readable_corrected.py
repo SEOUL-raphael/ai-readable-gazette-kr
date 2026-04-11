@@ -369,7 +369,37 @@ ALL_REPLACEMENTS = (
 )
 
 
+_BROKEN_IMG_RE = re.compile(
+    r'!\[([^\]]*)\]\([^)]*_images/[^)]*\.(?:png|jpe?g|gif|svg|webp)\)',
+    re.IGNORECASE,
+)
+
+
+def _img_marker(m: 're.Match[str]') -> str:
+    """Replace broken upstream image references with a visible marker.
+
+    The upstream OCR pipeline produced markdown image links that point to
+    `<doc>_images/imageFileN.png` paths, but the actual binary images
+    were never copied into this corpus. ~3M+ such references exist across
+    ~15.7k documents. We rewrite them in-place to a markdown italic note
+    so the reader (and downstream consumers) get a clean visible signal
+    instead of broken image elements.
+    """
+    alt = (m.group(1) or '').strip()
+    nm = re.match(r'image\s*(\d*)', alt, re.IGNORECASE)
+    if nm:
+        n = nm.group(1)
+        return f'*[원본 이미지 {n}]*' if n else '*[원본 이미지]*'
+    if alt:
+        return f'*[원본 이미지 — {alt}]*'
+    return '*[원본 이미지]*'
+
+
 def fix_text(text: str) -> str:
+    # v8 (2026-04-12): broken image link cleanup. Runs first so the
+    # markers don't tangle with subsequent text replacements.
+    text = _BROKEN_IMG_RE.sub(_img_marker, text)
+
     for a, b in ALL_REPLACEMENTS:
         text = text.replace(a, b)
 
@@ -545,17 +575,105 @@ def fix_text(text: str) -> str:
 
 
 def main():
-    OUT.mkdir(parents=True, exist_ok=True)
+    import argparse
+    import os
+
+    parser = argparse.ArgumentParser(description='Build the readable-corrected corpus.')
+    parser.add_argument(
+        '--src', type=Path, default=None,
+        help='Path to the source readable-final/ directory (the OCR-extracted '
+             'gazette markdown). Resolution order: --src arg, $GAZETTE_SRC env '
+             'var, <repo>/readable-final/, then a sibling readable-final/ '
+             'discovered next to this repo.',
+    )
+    parser.add_argument(
+        '--out', type=Path, default=OUT,
+        help='Output directory. Defaults to <repo>/derived/readable-corrected.',
+    )
+    parser.add_argument(
+        '--limit', type=int, default=0,
+        help='Stop after N files (for smoke testing). 0 = unlimited.',
+    )
+    parser.add_argument(
+        '--only', type=str, default=None,
+        help='Process only files whose relative path contains this substring.',
+    )
+    args = parser.parse_args()
+
+    src = args.src
+    if src is None:
+        env_src = os.environ.get('GAZETTE_SRC') or os.environ.get('GOV_GAZETTE_MD_SRC')
+        if env_src:
+            src = Path(env_src).expanduser()
+        elif SRC.is_dir():
+            src = SRC
+        else:
+            # Look for any sibling directory with a readable-final/ subdir.
+            for candidate in sorted(ROOT.parent.iterdir()):
+                rf = candidate / 'readable-final'
+                if rf.is_dir():
+                    src = rf
+                    break
+    if src is None or not src.is_dir():
+        parser.error(
+            'source readable-final/ directory not found. Set with --src, '
+            '$GAZETTE_SRC env var, or place readable-final/ at <repo>/readable-final.'
+        )
+
+    out_dir = args.out
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Skip upstream directories that are explicit duplicates of canonical
+    # YYYY-MM-DD folders. Some ingestion pipelines emit `day-YYYY-MM-DD/`
+    # siblings whose contents differ only in the `source_raw_md` frontmatter
+    # path; they would otherwise produce 68 file collisions per ingested day.
+    SKIP_DIR_RE = re.compile(r'^day-\d{4}-\d{2}-\d{2}$')
+    def _is_skipped(rel: Path) -> bool:
+        return any(SKIP_DIR_RE.match(part) for part in rel.parts)
+
+    src_relpaths: set = set()
     written = 0
-    for p in sorted(SRC.rglob('*.md')):
+    skipped = 0
+    for p in sorted(src.rglob('*.md')):
+        rel = p.relative_to(src)
+        if args.only and args.only not in str(rel):
+            continue
+        if _is_skipped(rel):
+            skipped += 1
+            continue
+        src_relpaths.add(rel)
         text = p.read_text(encoding='utf-8', errors='ignore')
         corrected = fix_text(text)
-        rel = p.relative_to(SRC)
-        out = OUT / rel
+        out = out_dir / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(corrected, encoding='utf-8')
         written += 1
-    print('WRITTEN', written)
+        if args.limit and written >= args.limit:
+            break
+    print('WRITTEN', written, 'from', src)
+    if skipped:
+        print('SKIPPED', skipped, '(day-* duplicates)')
+
+    # Prune stale outputs (full-build only — partial runs would prune
+    # files from other dates that the partial run did not visit).
+    if not args.limit and not args.only:
+        pruned = 0
+        for p in sorted(out_dir.rglob('*.md')):
+            rel = p.relative_to(out_dir)
+            if rel not in src_relpaths:
+                p.unlink()
+                pruned += 1
+        # Sweep empty parent directories
+        for d in sorted(
+            (d for d in out_dir.rglob('*') if d.is_dir()),
+            key=lambda x: -len(x.parts),
+        ):
+            try:
+                d.rmdir()
+            except OSError:
+                pass  # not empty, skip
+        if pruned:
+            print('PRUNED', pruned)
 
 
 if __name__ == '__main__':
