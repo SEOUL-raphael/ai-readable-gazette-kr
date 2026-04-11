@@ -13,6 +13,8 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to content</a>
+
 <header class="site">
   <div class="wrap">
     <div class="brand">
@@ -31,7 +33,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <div class="wrap">
 
     <!-- ============ HOME ============ -->
@@ -59,14 +61,20 @@
       </div>
 
       <section class="block">
+        <h2>Start here</h2>
+        <p class="sub">suggested entry points · one click to jump</p>
+        <div id="spotlight" class="spotlight"></div>
+      </section>
+
+      <section class="block">
         <h2>Timeline</h2>
-        <p class="sub">month-by-month density · click a bar to jump into browse</p>
+        <p class="sub">month-by-month density · darker = more documents · click a bar to jump</p>
         <div id="heatmap" class="heatmap"></div>
       </section>
 
       <section class="block">
         <h2>Most recent</h2>
-        <p class="sub">latest date groups in the corpus</p>
+        <p class="sub">latest date groups · click a date to open the full list</p>
         <div id="recent-list" class="recent-list"></div>
       </section>
 
@@ -81,16 +89,18 @@
     <!-- ============ BROWSE ============ -->
     <section id="view-browse" class="view">
       <div class="browse-layout">
-        <aside class="sidebar">
-          <div class="tabs">
-            <button data-tab="dates" class="active">Dates</button>
-            <button data-tab="inst">Institutions</button>
-            <button data-tab="search">Search</button>
+        <aside class="sidebar" aria-label="corpus navigation">
+          <div class="tabs" role="tablist">
+            <button data-tab="dates" class="active" role="tab" aria-selected="true">Dates</button>
+            <button data-tab="inst" role="tab" aria-selected="false">Institutions</button>
+            <button data-tab="search" role="tab" aria-selected="false">Search</button>
           </div>
-          <input type="search" id="filter" class="filter" placeholder="filter…">
-          <div id="list-dates" class="list active"></div>
-          <div id="list-inst" class="list"></div>
-          <div id="list-search" class="list search-results"></div>
+          <div id="year-jumper" class="year-jumper"></div>
+          <div id="cat-pills" class="cat-pills" hidden></div>
+          <input type="search" id="filter" class="filter" placeholder="filter dates…" aria-label="filter">
+          <div id="list-dates" class="list active" role="tabpanel"></div>
+          <div id="list-inst" class="list" role="tabpanel"></div>
+          <div id="list-search" class="list search-results" role="tabpanel"></div>
         </aside>
 
         <section class="main-pane">
@@ -105,18 +115,34 @@
 
           <article id="reader" class="reader" hidden>
             <div class="reader-head">
-              <button class="back" id="back-btn">← back</button>
+              <button class="back" id="back-btn" aria-label="back to list">← back</button>
               <div class="meta">
                 <span id="reader-date"></span>
                 &nbsp;·&nbsp;
                 <span class="inst" id="reader-inst"></span>
                 &nbsp;·&nbsp;
                 <span id="reader-n"></span>
+                <span id="reader-badge-slot"></span>
               </div>
-              <a class="raw" id="reader-raw" href="#" target="_blank" rel="noopener">raw md ↗</a>
+              <div class="reader-actions">
+                <button class="reader-btn" id="copy-link-btn" title="Copy permalink">copy link</button>
+                <a class="reader-btn primary" id="reader-raw" href="#" target="_blank" rel="noopener">raw md ↗</a>
+              </div>
             </div>
             <h2 class="doc-title" id="reader-title">—</h2>
+            <div id="reader-warning"></div>
+            <div id="reader-toc"></div>
             <div id="reader-body" class="markdown"></div>
+            <nav class="reader-nav" id="reader-nav" aria-label="document navigation">
+              <button id="prev-doc" disabled>
+                <span class="nav-label">← prev (j)</span>
+                <span class="nav-text">—</span>
+              </button>
+              <button id="next-doc" class="nav-next" disabled>
+                <span class="nav-label">next (k) →</span>
+                <span class="nav-text">—</span>
+              </button>
+            </nav>
           </article>
         </section>
       </div>
@@ -228,8 +254,32 @@ ai-readable-government     (press + gazette 통합 리더)</pre>
     <a href="https://github.com/hosungseo/gov-gazette-md" target="_blank" rel="noopener">source: gov-gazette-md</a>
     &nbsp;·&nbsp;
     <a href="https://github.com/hosungseo/ai-readable-government" target="_blank" rel="noopener">reader: ai-readable-government</a>
+    &nbsp;·&nbsp;
+    <a href="#" id="show-shortcuts">keyboard shortcuts (?)</a>
   </div>
 </footer>
+
+<!-- Keyboard shortcut help overlay -->
+<div id="kbd-hint" class="kbd-hint" role="dialog" aria-label="keyboard shortcuts">
+  <div class="panel">
+    <h3>Keyboard shortcuts</h3>
+    <table>
+      <tr><td><kbd>/</kbd></td><td>focus filter / search</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>clear filter or close reader</td></tr>
+      <tr><td><kbd>j</kbd> <kbd>↓</kbd></td><td>next document</td></tr>
+      <tr><td><kbd>k</kbd> <kbd>↑</kbd></td><td>previous document</td></tr>
+      <tr><td><kbd>Enter</kbd></td><td>open focused item</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>h</kbd></td><td>go home</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>b</kbd></td><td>go browse</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>a</kbd></td><td>go about</td></tr>
+      <tr><td><kbd>?</kbd></td><td>this help</td></tr>
+    </table>
+    <div class="close-hint">press <kbd>Esc</kbd> or <kbd>?</kbd> to close</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="app.js"></script>
