@@ -8,6 +8,10 @@
 128,403 documents · 1,474 date groups · 1,426 institutions · 2020-01-02 → 2026-04-07
 ```
 
+- **Code**: [MIT License](LICENSE)
+- **Gazette data**: public domain per Korean Copyright Act Article 7 — see [NOTICE.md](NOTICE.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+
 ---
 
 ## 무엇인가
@@ -46,7 +50,7 @@ derived/readable-corrected  (단어 보정 파생본)
 
 - **기간**: 2020-01-02 → 2026-04-07
 - **날짜 그룹**: 1,474
-- **문서**: 128,403 (인덱스 기준) · 128,471 (원시 파일 기준)
+- **문서**: 128,403
 - **기관**: 1,426
 
 기관 분류 (참고):
@@ -156,7 +160,7 @@ docs/                           정적 리더 (소스 보관)
     dates/YYYY-MM-DD.json       날짜별 문서 리스트
 
 derived/
-  readable-corrected/           보정본 128,471개 (이 저장소의 본체)
+  readable-corrected/           보정본 128,403개 (이 저장소의 본체)
     YYYY-MM-DD/NNN_*.md
 ```
 
@@ -218,4 +222,18 @@ python3 scripts/build_pages_index.py
 
 ## 라이선스
 
-원천 관보는 대한민국 정부 공공데이터다. 보정 스크립트 및 파생 코퍼스는 공익 목적 재배포를 전제로 한다.
+- **코드** (scripts, docs/\*.html|css|js, 워크플로우, 설정 파일): [MIT License](LICENSE)
+- **데이터** (`derived/readable-corrected/`): 원천 관보는 대한민국 저작권법 제7조에 따라 보호받지 못하는 저작물이며 자유 이용이 가능합니다. 이 저장소의 파생 코퍼스는 추가 권리 주장을 최소화하기 위해 공공 도메인에 헌납하는 것을 선언합니다 (CC0 1.0 수준).
+- 자세한 근거와 출처 표시 권장 문구는 [NOTICE.md](NOTICE.md) 참조
+
+## 기여
+
+사전 확장 기여는 다음 루프를 따릅니다.
+
+1. `extract_residual_tokens.py` 로 상위 잔존 토큰 뽑기
+2. `dump_char_contexts.py` 로 단일 문자 이웃 분포 검증
+3. `build_readable_corrected.py` 에 compound 또는 single_char 추가
+4. `fix_text` 스모크 테스트 → 전체 재빌드 → 재스캔
+5. `CHANGELOG.md` 에 항목 추가
+
+감 기반 치환은 피하고, 1000+ 샘플 근거 없이는 단일 문자 전역 치환을 추가하지 않습니다. 자세한 정책은 [CHANGELOG.md](CHANGELOG.md) 참조.

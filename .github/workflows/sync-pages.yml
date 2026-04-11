@@ -1,0 +1,69 @@
+name: Sync docs/ to gh-pages
+
+# Whenever docs/ changes on main, mirror its contents to the gh-pages branch
+# root so GitHub Pages can serve the static reader. The corpus itself is too
+# large (2.4GB) to check out on the Pages build runner, and several Korean
+# filenames in the corpus exceed the filesystem's 255-byte limit, so the
+# Pages source is split off to a dedicated gh-pages branch.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/sync-pages.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-pages
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    steps:
+      - name: Checkout docs/ (sparse, shallow)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: docs
+
+      - name: Sync docs/ to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Stage content to deploy
+          staging="$(mktemp -d)"
+          cp -a docs/. "$staging/"
+          # Ensure Jekyll is bypassed on gh-pages
+          touch "$staging/.nojekyll"
+
+          # Clone gh-pages in isolation
+          work="$(mktemp -d)"
+          git clone --depth 1 --branch gh-pages \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$work"
+
+          cd "$work"
+          # Remove everything except .git
+          find . -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+
+          # Lay down new content at branch root
+          cp -a "$staging/." .
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "no changes to deploy"
+            exit 0
+          fi
+
+          git commit -m "pages: sync from main@${GITHUB_SHA::10}"
+          git push origin gh-pages

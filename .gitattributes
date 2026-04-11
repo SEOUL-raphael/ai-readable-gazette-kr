@@ -1,0 +1,43 @@
+# ==========================================================================
+# Linguist overrides
+#
+# GitHub's language detection (linguist) indexes every text file. This corpus
+# has ~128k Korean gazette markdown files that would drown out the actual
+# source code. Mark derived data as generated/vendored so the repo's
+# language stats reflect the pipeline code, not the corpus.
+# ==========================================================================
+
+derived/readable-corrected/**   linguist-generated=true
+derived/readable-corrected/**   linguist-detectable=false
+docs/data/**                     linguist-generated=true
+docs/data/**                     linguist-detectable=false
+reports/**                       linguist-generated=true
+
+# ==========================================================================
+# Text / encoding normalization
+# ==========================================================================
+
+*.md     text eol=lf
+*.py     text eol=lf diff=python
+*.js     text eol=lf
+*.css    text eol=lf
+*.html   text eol=lf
+*.json   text eol=lf
+*.tsv    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+LICENSE  text eol=lf
+NOTICE.md text eol=lf
+CHANGELOG.md text eol=lf
+README.md text eol=lf
+
+# ==========================================================================
+# Binary-ish: very large generated gazette files
+#
+# A handful of derived gazette md files exceed 10MB and one exceeds 64MB.
+# Git treats them as text, which causes slow diffs and slow checkouts.
+# Declaring them as text with specific diff strategy keeps behavior
+# reasonable without turning them into actual binary blobs.
+# ==========================================================================
+
+derived/readable-corrected/**/*.md   text eol=lf diff=gazette
