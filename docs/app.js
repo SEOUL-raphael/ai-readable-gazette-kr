@@ -390,6 +390,15 @@ function selectInstTab() {
   $('#filter').placeholder = 'filter institutions…';
   applyFilter($('#filter').value);
 }
+
+function renderDocsListSkeleton(count) {
+  return Array.from({ length: count }, () =>
+    `<div class="skeleton-row">
+      <div class="skel-line short"></div>
+      <div class="skel-line long"></div>
+    </div>`
+  ).join('');
+}
 function selectSearchTab() {
   currentTab = 'search';
   $$('.sidebar .tabs button').forEach(b => {
@@ -402,30 +411,53 @@ function selectSearchTab() {
   $('#year-jumper').hidden = true;
   $('#cat-pills').hidden = true;
   $('#filter').placeholder = 'search titles (2+ chars)…';
+  updateFilterCount(0, 0, true);
   if (!$('#filter').value) {
     $('#list-search').innerHTML =
       `<p class="search-hint">
         제목 검색.<br>2글자 이상 입력.<br>상위 50건까지 표시.
       </p>`;
   }
+  // Auto-focus the input so the user can start typing immediately.
+  setTimeout(() => $('#filter').focus(), 0);
 }
 
 function applyFilter(q) {
   if (currentTab === 'search') {
     handleSearch(q);
+    updateFilterCount(0, 0, true);
     return;
   }
   const list = $(`#list-${currentTab}`);
   if (!list) return;
   const needle = q.trim().toLowerCase();
+  let shown = 0;
+  let total = 0;
   list.querySelectorAll('.item').forEach(el => {
+    total++;
     const text = el.textContent.toLowerCase();
     let show = !needle || text.includes(needle);
     if (show && currentTab === 'inst' && currentCategory) {
       show = (el.dataset.cat || '') === currentCategory;
     }
     el.style.display = show ? '' : 'none';
+    if (show) shown++;
   });
+  updateFilterCount(shown, total);
+}
+
+function updateFilterCount(shown, total, hide) {
+  const el = $('#filter-count');
+  if (!el) return;
+  if (hide) {
+    el.textContent = '';
+    return;
+  }
+  if (shown === total) {
+    el.textContent = `${total.toLocaleString()}`;
+  } else {
+    el.textContent = `${shown.toLocaleString()} / ${total.toLocaleString()}`;
+  }
 }
 
 // ====================================================================
@@ -519,7 +551,7 @@ async function loadDateDocs(date) {
   const head = $('#main-head');
   const list = $('#docs-list');
   head.innerHTML = `<h2>${date}</h2><p class="sub"><span class="spinner"></span>loading…</p>`;
-  list.innerHTML = '';
+  list.innerHTML = renderDocsListSkeleton(6);
   try {
     const resp = await fetch(`${DATA_BASE}/dates/${date}.json`);
     if (!resp.ok) throw new Error('date fetch failed');
@@ -557,7 +589,7 @@ async function loadInstDocs(inst) {
   const head = $('#main-head');
   const list = $('#docs-list');
   head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub"><span class="spinner"></span>collecting…</p>`;
-  list.innerHTML = '';
+  list.innerHTML = renderDocsListSkeleton(8);
 
   const data = await ensureTitles();
   if (!data) {
@@ -778,16 +810,37 @@ function buildTOC() {
     return `<li class="lvl-${lvl}"><a href="#${id}">${escapeHtml(h.textContent)}</a></li>`;
   }).join('');
   tocHost.innerHTML = `<div class="toc-box">
-    <div class="toc-title">Contents · ${headings.length} sections</div>
+    <div class="toc-head">
+      <div class="toc-title">Contents · ${headings.length} sections</div>
+      <button class="toc-toggle" type="button" aria-expanded="true">hide</button>
+    </div>
     <ul>${items}</ul>
   </div>`;
+  // Wire collapse toggle
+  const box = tocHost.querySelector('.toc-box');
+  const toggleBtn = tocHost.querySelector('.toc-toggle');
+  toggleBtn.addEventListener('click', () => {
+    const collapsed = box.classList.toggle('collapsed');
+    toggleBtn.textContent = collapsed ? 'show' : 'hide';
+    toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  });
+  // The whole header area also acts as a click target
+  const head = tocHost.querySelector('.toc-head');
+  head.addEventListener('click', e => {
+    if (e.target === toggleBtn) return; // already handled
+    toggleBtn.click();
+  });
 }
 
 function updateReaderNav() {
   const prev = $('#prev-doc');
   const next = $('#next-doc');
+  const prevTop = $('#prev-doc-top');
+  const nextTop = $('#next-doc-top');
   if (!currentDocs.length || currentDocIdx < 0) {
     prev.disabled = true; next.disabled = true;
+    if (prevTop) prevTop.disabled = true;
+    if (nextTop) nextTop.disabled = true;
     prev.querySelector('.nav-text').textContent = '—';
     next.querySelector('.nav-text').textContent = '—';
     return;
@@ -796,8 +849,12 @@ function updateReaderNav() {
   const nextDoc = currentDocs[currentDocIdx + 1];
   prev.disabled = !prevDoc;
   next.disabled = !nextDoc;
+  if (prevTop) prevTop.disabled = !prevDoc;
+  if (nextTop) nextTop.disabled = !nextDoc;
   prev.querySelector('.nav-text').textContent = prevDoc ? cleanTitle(prevDoc.title) : '—';
   next.querySelector('.nav-text').textContent = nextDoc ? cleanTitle(nextDoc.title) : '—';
+  if (prevTop && prevDoc) prevTop.title = `Previous: ${cleanTitle(prevDoc.title)}`;
+  if (nextTop && nextDoc) nextTop.title = `Next: ${cleanTitle(nextDoc.title)}`;
 }
 
 function navigateDoc(delta) {
@@ -909,9 +966,30 @@ function wireUI() {
   // back button
   $('#back-btn').addEventListener('click', closeReader);
 
-  // prev / next
+  // prev / next (bottom buttons + top quick-nav icons)
   $('#prev-doc').addEventListener('click', () => navigateDoc(-1));
   $('#next-doc').addEventListener('click', () => navigateDoc(+1));
+  const prevTop = $('#prev-doc-top');
+  const nextTop = $('#next-doc-top');
+  if (prevTop) prevTop.addEventListener('click', () => navigateDoc(-1));
+  if (nextTop) nextTop.addEventListener('click', () => navigateDoc(+1));
+
+  // scroll-to-top floating button
+  const scrollTop = $('#scroll-top');
+  if (scrollTop) {
+    scrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    let scrollTicking = false;
+    window.addEventListener('scroll', () => {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        scrollTop.hidden = window.scrollY < 400;
+        scrollTicking = false;
+      });
+    }, { passive: true });
+  }
 
   // copy permalink
   $('#copy-link-btn').addEventListener('click', copyPermalink);
