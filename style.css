@@ -432,19 +432,8 @@ section.block > .sub {
   border-bottom-color: var(--ink);
   background: var(--line-2);
 }
-.sidebar .filter {
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  padding: 11px 14px;
-  font: inherit;
-  font-size: 13px;
-  background: var(--canvas);
-  color: var(--ink);
-  outline: 0;
-}
-.sidebar .filter:focus {
-  background: var(--civic-bg);
-}
+/* Legacy standalone .filter — kept as fallback if filter-row wrapper missing.
+   Active filter styling now lives under .filter-row in the section below. */
 .sidebar .list {
   display: none;
   overflow-y: auto;
@@ -1401,6 +1390,174 @@ footer.site a:hover { color: var(--ink); }
   text-align: right;
   letter-spacing: 0.04em;
 }
+
+/* ============================================================
+   Reader quick nav (top prev/next icon buttons)
+   ============================================================ */
+.reader-quick-nav {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 4px;
+}
+.quick-nav-btn {
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 1;
+  border-radius: var(--rad);
+  cursor: pointer;
+  font-family: var(--mono);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.quick-nav-btn:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.quick-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Filter row (input + match count)
+   ============================================================ */
+.filter-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.filter-row .filter {
+  flex: 1;
+  border: 0;
+  padding: 11px 14px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--canvas);
+  color: var(--ink);
+  outline: 0;
+  min-width: 0;
+}
+.filter-row .filter:focus {
+  background: var(--civic-bg);
+}
+.filter-row .filter-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--hush);
+  letter-spacing: 0.04em;
+  background: var(--canvas);
+  white-space: nowrap;
+}
+.filter-row .filter-count:empty {
+  display: none;
+}
+
+/* ============================================================
+   Floating "back to top"
+   ============================================================ */
+.scroll-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 44px;
+  height: 44px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: var(--rad);
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 80;
+  box-shadow: 4px 4px 0 rgba(17, 19, 24, 0.18);
+  transition: transform 0.15s, opacity 0.15s;
+  opacity: 0.85;
+}
+.scroll-top:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+.scroll-top[hidden] {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  .scroll-top {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+}
+
+/* ============================================================
+   Doc list loading skeleton
+   ============================================================ */
+.skeleton-row {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.skeleton-row .skel-line {
+  background: linear-gradient(
+    90deg,
+    var(--line-2) 0%,
+    var(--line) 50%,
+    var(--line-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: skel 1.4s ease-in-out infinite;
+  height: 11px;
+  border-radius: 2px;
+  margin: 0 14px;
+}
+.skeleton-row .skel-line.short { width: 35%; height: 9px; margin-bottom: 8px; }
+.skeleton-row .skel-line.long  { width: 80%; }
+@keyframes skel {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
+}
+
+/* ============================================================
+   TOC collapse toggle
+   ============================================================ */
+.toc-box .toc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 10px;
+}
+.toc-box .toc-head .toc-title {
+  margin: 0;
+  flex: 1;
+}
+.toc-box .toc-head .toc-toggle {
+  border: 1px solid var(--line);
+  background: var(--canvas);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--hush);
+  padding: 2px 7px;
+  border-radius: var(--rad);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.toc-box .toc-head .toc-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.toc-box.collapsed ul { display: none; }
+.toc-box.collapsed { padding-bottom: 4px; margin-bottom: 16px; }
 
 /* ============================================================
    Toast

@@ -24,7 +24,7 @@
     <div class="brand">
       <h1>AI Readable Gazette KR</h1>
       <span class="slash">//</span>
-      <span class="version">v7</span>
+      <span class="version">v8</span>
     </div>
     <p class="tag">대한민국 관보 · OCR 보정 파생 코퍼스 · 사전 기반 단어 보정</p>
     <p class="stats" id="stats">loading…</p>
@@ -101,7 +101,10 @@
           </div>
           <div id="year-jumper" class="year-jumper"></div>
           <div id="cat-pills" class="cat-pills" hidden></div>
-          <input type="search" id="filter" class="filter" placeholder="filter dates…" aria-label="filter">
+          <div class="filter-row">
+            <input type="search" id="filter" class="filter" placeholder="filter dates…" aria-label="filter">
+            <span class="filter-count" id="filter-count" aria-live="polite"></span>
+          </div>
           <div id="list-dates" class="list active" role="tabpanel"></div>
           <div id="list-inst" class="list" role="tabpanel"></div>
           <div id="list-search" class="list search-results" role="tabpanel"></div>
@@ -120,6 +123,10 @@
           <article id="reader" class="reader" hidden>
             <div class="reader-head">
               <button class="back" id="back-btn" aria-label="back to list">← back</button>
+              <div class="reader-quick-nav" aria-label="quick navigation">
+                <button class="quick-nav-btn" id="prev-doc-top" title="Previous document (k)" aria-label="previous">‹</button>
+                <button class="quick-nav-btn" id="next-doc-top" title="Next document (j)" aria-label="next">›</button>
+              </div>
               <div class="meta">
                 <span id="reader-date"></span>
                 &nbsp;·&nbsp;
@@ -139,11 +146,11 @@
             <div id="reader-body" class="markdown"></div>
             <nav class="reader-nav" id="reader-nav" aria-label="document navigation">
               <button id="prev-doc" disabled>
-                <span class="nav-label">← prev (j)</span>
+                <span class="nav-label">← prev (k)</span>
                 <span class="nav-text">—</span>
               </button>
               <button id="next-doc" class="nav-next" disabled>
-                <span class="nav-label">next (k) →</span>
+                <span class="nav-label">next (j) →</span>
                 <span class="nav-text">—</span>
               </button>
             </nav>
@@ -286,6 +293,9 @@ derived/readable-corrected/ + GitHub Pages 리더
     <div class="close-hint">press <kbd>Esc</kbd> or <kbd>?</kbd> to close</div>
   </div>
 </div>
+
+<!-- Floating back-to-top button -->
+<button id="scroll-top" class="scroll-top" aria-label="scroll to top" title="back to top" hidden>↑</button>
 
 <!-- Toast -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
