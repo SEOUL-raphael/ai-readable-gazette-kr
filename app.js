@@ -21,6 +21,27 @@ const DATA_BASE = 'data';
 const LARGE_FILE_BYTES = 1_500_000;   // 1.5MB threshold for size warning
 const RECENT_TITLES_PER_DATE = 3;
 
+// --- URL helper -------------------------------------------------------
+//
+// Programmatic URL updates use history.replaceState so they DO NOT fire a
+// hashchange event. Earlier the reader assigned `location.hash = ...` which
+// caused a feedback loop: openDoc set the hash → hashchange fired →
+// routeFromHash called selectDate → selectDate hid the reader and set the
+// hash → hashchange fired → openDoc again → reader flickered = "튕김".
+//
+// Browser-initiated hash navigation (anchor link clicks, address bar paste,
+// back/forward) still fires hashchange via the listener in wireUI(), so SPA
+// routing still works for those user paths.
+function setHash(h) {
+  if (window.history && history.replaceState) {
+    try {
+      history.replaceState(null, '', '#' + h);
+      return;
+    } catch (_) { /* fall through */ }
+  }
+  location.hash = h;
+}
+
 // --- globals / state ---
 let META = null;
 let TITLES = null;                    // lazy loaded search index
@@ -491,7 +512,7 @@ async function selectDate(date) {
   $('#docs-list').style.display = '';
   $('#main-head').style.display = '';
   await loadDateDocs(date);
-  location.hash = `browse/date/${date}`;
+  setHash(`browse/date/${date}`);
 }
 
 async function loadDateDocs(date) {
@@ -529,7 +550,7 @@ async function selectInst(inst) {
   $('#docs-list').style.display = '';
   $('#main-head').style.display = '';
   await loadInstDocs(inst);
-  location.hash = `browse/inst/${encodeURIComponent(inst)}`;
+  setHash(`browse/inst/${encodeURIComponent(inst)}`);
 }
 
 async function loadInstDocs(inst) {
@@ -675,7 +696,7 @@ async function openDoc(date, file) {
     } else {
       renderMarkdown(md);
     }
-    location.hash = `doc=${encodeURIComponent(date)}/${encodeURIComponent(file)}`;
+    setHash(`doc=${encodeURIComponent(date)}/${encodeURIComponent(file)}`);
   } catch (e) {
     $('#reader-body').innerHTML = `<p class="hint">load failed: ${escapeHtml(e.message)}</p>`;
   }
@@ -847,7 +868,7 @@ function wireUI() {
     a.addEventListener('click', e => {
       e.preventDefault();
       switchView(a.dataset.view);
-      location.hash = a.dataset.view;
+      setHash(a.dataset.view);
       if (a.dataset.view === 'home') window.scrollTo({ top: 0, behavior: 'instant' });
     });
   });
@@ -912,9 +933,9 @@ function closeReader() {
   $('#docs-list').style.display = '';
   $('#main-head').style.display = '';
   if (location.hash.startsWith('#doc=')) {
-    if (currentDate) location.hash = `browse/date/${currentDate}`;
-    else if (currentInst) location.hash = `browse/inst/${encodeURIComponent(currentInst)}`;
-    else location.hash = 'browse';
+    if (currentDate) setHash(`browse/date/${currentDate}`);
+    else if (currentInst) setHash(`browse/inst/${encodeURIComponent(currentInst)}`);
+    else setHash('browse');
   }
   currentDocIdx = -1;
 }
@@ -1004,9 +1025,9 @@ function setupKeyboardShortcuts() {
     }
     if (gPressed) {
       gPressed = false;
-      if (e.key === 'h') { switchView('home'); location.hash = 'home'; window.scrollTo(0, 0); return; }
-      if (e.key === 'b') { switchView('browse'); location.hash = 'browse'; return; }
-      if (e.key === 'a') { switchView('about'); location.hash = 'about'; return; }
+      if (e.key === 'h') { switchView('home'); setHash('home'); window.scrollTo(0, 0); return; }
+      if (e.key === 'b') { switchView('browse'); setHash('browse'); return; }
+      if (e.key === 'a') { switchView('about'); setHash('about'); return; }
     }
 
     // j / k / arrow keys in reader = prev/next doc
