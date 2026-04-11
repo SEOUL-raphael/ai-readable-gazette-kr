@@ -629,13 +629,23 @@ async function openDoc(date, file) {
   $('#docs-list').style.display = 'none';
   $('#main-head').style.display = 'none';
 
-  const parsed = parseFilename(file);
-  const title = parsed ? cleanTitle(parsed.title) : file;
+  // Prefer inst/title from currentDocs (which carries the index-derived
+  // compound publisher like "강원도 화천군"). Fall back to filename
+  // parsing only when the doc isn't in the current list.
+  const fromList = currentDocs.length
+    ? currentDocs.find(d => d.date === date && d.file === file)
+    : null;
+  const parsed = fromList || parseFilename(file);
+  const inst = fromList ? fromList.inst : (parsed ? parsed.inst : '');
+  const serial = fromList ? fromList.n : (parsed ? parsed.n : '');
+  const title = cleanTitle(
+    fromList ? fromList.title : (parsed ? parsed.title : file)
+  );
 
   $('#reader-date').textContent = date;
   $('#reader-raw').href = url;
-  $('#reader-inst').textContent = parsed ? parsed.inst : '';
-  $('#reader-n').textContent = parsed ? `#${parsed.n}` : '';
+  $('#reader-inst').textContent = inst;
+  $('#reader-n').textContent = serial ? `#${serial}` : '';
   $('#reader-title').textContent = title;
   $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>loading document…</p>';
   $('#reader-warning').innerHTML = '';
@@ -673,14 +683,41 @@ async function openDoc(date, file) {
 }
 
 function renderMarkdown(md) {
-  let html = '';
+  // The reader fetches raw markdown from a public corpus, so the document
+  // body is untrusted text from the user's perspective even though we
+  // ourselves authored the corpus. Always sanitize the HTML produced by
+  // marked.js before injecting into the DOM. DOMPurify forbids <script>,
+  // inline event handlers, javascript: URLs, etc. while keeping the
+  // markdown structure intact.
+  let dirty = '';
   try {
-    html = marked.parse(md, { breaks: false });
+    dirty = marked.parse(md, { breaks: false });
   } catch (e) {
     $('#reader-body').innerHTML = `<p class="hint">render failed: ${escapeHtml(e.message)}</p>`;
     return;
   }
-  $('#reader-body').innerHTML = html;
+  let clean;
+  if (typeof DOMPurify !== 'undefined') {
+    clean = DOMPurify.sanitize(dirty, {
+      // Keep markdown's basic anchor support but strip JS-bearing attrs.
+      ALLOWED_ATTR: ['href', 'title', 'alt', 'src', 'class', 'id', 'colspan', 'rowspan', 'align'],
+      // External images are uncommon in the corpus and most local refs
+      // were already rewritten to text markers in build_readable_corrected.
+      FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+    });
+  } else {
+    // DOMPurify failed to load; fall back to a strict regex strip so we
+    // never inject raw script tags. Also surfaces a hint to the user.
+    clean = dirty
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '')
+      .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+      .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+      .replace(/javascript:/gi, '');
+    console && console.warn && console.warn('DOMPurify unavailable; using fallback strip');
+  }
+  $('#reader-body').innerHTML = clean;
   buildTOC();
 }
 

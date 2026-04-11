@@ -184,15 +184,20 @@
           기반 레이어가 먼저 필요하다.
         </p>
 
-        <h2>저장소 관계</h2>
-        <pre>gov-gazette-md            (원본형 readable-final, 건드리지 않음)
+        <h2>출처와 흐름</h2>
+        <pre>대한민국 행정안전부 전자관보 (gwanbo.go.kr)
         │
-        │  scripts/build_readable_corrected.py
+        │  PDF → opendataloader OCR → readable-final markdown
         ▼
-ai-readable-gazette-kr     (이 저장소, 단어 보정 파생본)
+사전 기반 보정 (scripts/build_readable_corrected.py)
         │
         ▼
-ai-readable-government     (press + gazette 통합 리더)</pre>
+derived/readable-corrected/ + GitHub Pages 리더
+(이 저장소, ai-readable-gazette-kr)</pre>
+        <p>
+          원천 PDF 는 정부 공공데이터, 보정 스크립트는 MIT 공개. 외부 비공개 의존성 없이
+          누구든 처음부터 동일한 결과를 만들 수 있다.
+        </p>
 
         <h2>보정 방법</h2>
         <p>
@@ -255,9 +260,9 @@ ai-readable-government     (press + gazette 통합 리더)</pre>
   <div class="wrap">
     <a href="https://github.com/hosungseo/ai-readable-gazette-kr" target="_blank" rel="noopener">ai-readable-gazette-kr</a>
     &nbsp;·&nbsp;
-    <a href="https://github.com/hosungseo/gov-gazette-md" target="_blank" rel="noopener">source: gov-gazette-md</a>
+    <a href="http://gwanbo.go.kr" target="_blank" rel="noopener">원천: 행정안전부 전자관보</a>
     &nbsp;·&nbsp;
-    <a href="https://github.com/hosungseo/ai-readable-government" target="_blank" rel="noopener">reader: ai-readable-government</a>
+    <a href="https://github.com/hosungseo/ai-readable-gazette-kr/blob/main/NOTICE.md" target="_blank" rel="noopener">data notice</a>
     &nbsp;·&nbsp;
     <a href="#" id="show-shortcuts">keyboard shortcuts (?)</a>
   </div>
@@ -286,6 +291,7 @@ ai-readable-government     (press + gazette 통합 리더)</pre>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.11/dist/purify.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
