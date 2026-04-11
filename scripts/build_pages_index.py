@@ -119,6 +119,7 @@ def main():
     institution_counter: Counter[str] = Counter()
     month_counts: dict[str, int] = defaultdict(int)
     all_titles: list[list] = []  # [date_idx, serial, inst_idx, title]
+    sample_by_date: dict[str, list[dict]] = {}  # first 3 docs per date, for home recent view
 
     date_index: dict[str, int] = {}
     inst_index: dict[str, int] = {}
@@ -153,6 +154,10 @@ def main():
             all_titles.append([di, doc['n'], ii, doc['title'], doc['file']])
 
         date_counts.append({'date': date, 'count': len(docs)})
+        sample_by_date[date] = [
+            {'n': d['n'], 'inst': d['inst'], 'title': d['title'], 'file': d['file']}
+            for d in docs[:3]
+        ]
         total_docs += len(docs)
         month_counts[date[:7]] += len(docs)
 
@@ -191,6 +196,13 @@ def main():
     # Year-month heatmap (sorted)
     heatmap = [{'ym': ym, 'count': month_counts[ym]} for ym in sorted(month_counts.keys())]
 
+    # Recent samples: last 10 dates with top 3 doc titles each (for home view)
+    recent_sorted = sorted(date_counts, key=lambda x: x['date'], reverse=True)[:10]
+    recent_samples = [
+        {'date': d['date'], 'count': d['count'], 'samples': sample_by_date.get(d['date'], [])}
+        for d in recent_sorted
+    ]
+
     meta = {
         'version': 'v7',
         'total_docs': total_docs,
@@ -201,6 +213,7 @@ def main():
         'institutions': institutions,
         'institution_tree': inst_tree,
         'heatmap': heatmap,
+        'recent_samples': recent_samples,
         'category_order': CATEGORY_ORDER,
         'raw_base': RAW_BASE,
         'blob_base': BLOB_BASE,
