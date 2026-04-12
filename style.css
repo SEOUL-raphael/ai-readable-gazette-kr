@@ -831,6 +831,15 @@ footer.site a:hover { color: var(--ink); }
     position: static;
     max-height: 380px;
   }
+  #view-browse.reader-open .browse-layout {
+    gap: 0;
+  }
+  #view-browse.reader-open .browse-layout .sidebar {
+    display: none;
+  }
+  #view-browse.reader-open .main-pane {
+    min-height: auto;
+  }
   .home-intro { grid-template-columns: 1fr; gap: 24px; }
   .reader { padding: 24px 18px 32px; }
   .reader h2.doc-title { font-size: 22px; }

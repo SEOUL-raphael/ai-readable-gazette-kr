@@ -535,6 +535,7 @@ function handleSearch(q) {
 // ====================================================================
 async function selectDate(date) {
   switchView('browse');
+  setBrowseReaderState(false);
   selectDateTab();
   currentDate = date;
   currentInst = null;
@@ -573,6 +574,7 @@ async function loadDateDocs(date) {
 
 async function selectInst(inst) {
   switchView('browse');
+  setBrowseReaderState(false);
   selectInstTab();
   currentInst = inst;
   currentDate = null;
@@ -677,6 +679,7 @@ function renderDocsList(docs, opts) {
 // ====================================================================
 async function openDoc(date, file) {
   switchView('browse');
+  setBrowseReaderState(true);
   const url = `${META.raw_base}/${date}/${encodeURIComponent(file)}`;
   $('#reader').hidden = false;
   $('#docs-list').style.display = 'none';
@@ -914,6 +917,13 @@ function switchView(view) {
   $$('.view').forEach(el => el.classList.toggle('active', el.id === `view-${view}`));
   $$('header.site nav.top a[data-view]').forEach(a =>
     a.classList.toggle('active', a.dataset.view === view));
+  if (view !== 'browse') setBrowseReaderState(false);
+}
+
+function setBrowseReaderState(open) {
+  const browseView = $('#view-browse');
+  if (!browseView) return;
+  browseView.classList.toggle('reader-open', !!open);
 }
 
 // ====================================================================
@@ -1007,6 +1017,7 @@ function wireUI() {
 }
 
 function closeReader() {
+  setBrowseReaderState(false);
   $('#reader').hidden = true;
   $('#docs-list').style.display = '';
   $('#main-head').style.display = '';
@@ -1016,6 +1027,7 @@ function closeReader() {
     else setHash('browse');
   }
   currentDocIdx = -1;
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function copyPermalink() {
