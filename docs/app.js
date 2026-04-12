@@ -264,7 +264,7 @@ function renderInstTree() {
     const items = cat.items.slice(0, 30).map(i =>
       `<div class="inst-row" data-inst="${escapeAttr(i.name)}" tabindex="0">
         <span>${escapeHtml(i.name)}</span>
-        <span class="cnt">${i.count.toLocaleString()}</span>
+        <span class="cnt">${i.count.toLocaleString()}건</span>
       </div>`).join('');
     const rest = cat.items.length > 30
       ? `<div class="inst-row" data-cat-rest="${escapeAttr(cat.cat)}" tabindex="0" style="color:var(--hush)">
@@ -275,7 +275,7 @@ function renderInstTree() {
     return `<div class="cat" data-cat="${escapeAttr(cat.cat)}">
       <button class="cat-head" aria-expanded="false">
         <span><span class="disclose">▸</span><span class="name">${escapeHtml(cat.cat)}</span></span>
-        <span class="count">${cat.n_inst} 기관 · ${cat.count.toLocaleString()} 문서</span>
+        <span class="count">기관 ${cat.n_inst}곳 · 문서 ${cat.count.toLocaleString()}건</span>
       </button>
       <div class="cat-items">${items}${rest}</div>
     </div>`;
@@ -315,7 +315,7 @@ function renderDatesSidebar() {
   const list = $('#list-dates');
   const html = META.dates.slice().reverse()
     .map(d => `<div class="item" data-date="${d.date}" tabindex="0" role="button">
-      <span>${d.date}</span><span class="count">${d.count}</span>
+      <span>${d.date}</span><span class="count">${d.count.toLocaleString()}건</span>
     </div>`).join('');
   list.innerHTML = html;
 }
@@ -324,7 +324,7 @@ function renderInstSidebar() {
   const list = $('#list-inst');
   const html = META.institutions
     .map(i => `<div class="item" data-inst="${escapeAttr(i.name)}" data-cat="${escapeAttr(i.cat || '')}" tabindex="0" role="button">
-      <span>${escapeHtml(i.name)}</span><span class="count">${i.count}</span>
+      <span>${escapeHtml(i.name)}</span><span class="count">${i.count.toLocaleString()}건</span>
     </div>`).join('');
   list.innerHTML = html;
 }
