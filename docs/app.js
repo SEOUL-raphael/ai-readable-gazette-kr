@@ -536,6 +536,7 @@ function handleSearch(q) {
 async function selectDate(date) {
   switchView('browse');
   setBrowseReaderState(false);
+  setBrowseSelectionState(true);
   selectDateTab();
   currentDate = date;
   currentInst = null;
@@ -575,6 +576,7 @@ async function loadDateDocs(date) {
 async function selectInst(inst) {
   switchView('browse');
   setBrowseReaderState(false);
+  setBrowseSelectionState(true);
   selectInstTab();
   currentInst = inst;
   currentDate = null;
@@ -917,13 +919,46 @@ function switchView(view) {
   $$('.view').forEach(el => el.classList.toggle('active', el.id === `view-${view}`));
   $$('header.site nav.top a[data-view]').forEach(a =>
     a.classList.toggle('active', a.dataset.view === view));
-  if (view !== 'browse') setBrowseReaderState(false);
+  if (view !== 'browse') {
+    setBrowseReaderState(false);
+    setBrowseSelectionState(false);
+  }
 }
 
 function setBrowseReaderState(open) {
   const browseView = $('#view-browse');
   if (!browseView) return;
   browseView.classList.toggle('reader-open', !!open);
+}
+
+function setBrowseSelectionState(open) {
+  const browseView = $('#view-browse');
+  const backBtn = $('#browse-back-btn');
+  if (browseView) browseView.classList.toggle('selection-open', !!open);
+  if (backBtn) backBtn.hidden = !open;
+}
+
+function resetBrowseMainPane() {
+  const head = $('#main-head');
+  const list = $('#docs-list');
+  if (head) head.innerHTML = `<h2>Browse</h2><p class="sub">select a date, an institution, or search by title</p>`;
+  if (list) list.innerHTML = `<p class="hint">Choose a date or institution from the filters.</p>`;
+}
+
+function clearBrowseSelection() {
+  currentDate = null;
+  currentInst = null;
+  currentDocs = [];
+  currentDocIdx = -1;
+  markSelected('#list-dates', null);
+  markSelected('#list-inst', null);
+  $('#reader').hidden = true;
+  $('#docs-list').style.display = '';
+  $('#main-head').style.display = '';
+  setBrowseReaderState(false);
+  setBrowseSelectionState(false);
+  resetBrowseMainPane();
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 // ====================================================================
@@ -975,6 +1010,13 @@ function wireUI() {
 
   // back button
   $('#back-btn').addEventListener('click', closeReader);
+  const browseBackBtn = $('#browse-back-btn');
+  if (browseBackBtn) {
+    browseBackBtn.addEventListener('click', () => {
+      clearBrowseSelection();
+      setHash('browse');
+    });
+  }
 
   // prev / next (bottom buttons + top quick-nav icons)
   $('#prev-doc').addEventListener('click', () => navigateDoc(-1));
@@ -1018,6 +1060,7 @@ function wireUI() {
 
 function closeReader() {
   setBrowseReaderState(false);
+  setBrowseSelectionState(!!(currentDate || currentInst));
   $('#reader').hidden = true;
   $('#docs-list').style.display = '';
   $('#main-head').style.display = '';
@@ -1190,8 +1233,13 @@ function routeFromHash() {
     switchView('home');
     return;
   }
-  if (h === 'home' || h === 'browse' || h === 'about') {
+  if (h === 'home' || h === 'about') {
     switchView(h);
+    return;
+  }
+  if (h === 'browse') {
+    switchView('browse');
+    clearBrowseSelection();
     return;
   }
   if (h.startsWith('browse/date/')) {
