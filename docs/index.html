@@ -17,21 +17,21 @@
 </head>
 <body>
 
-<a href="#main" class="skip-link">Skip to content</a>
+<a href="#main" class="skip-link">본문 바로가기</a>
 
 <header class="site">
   <div class="wrap">
     <div class="brand">
       <h1>AI Readable Gazette KR</h1>
       <span class="slash">//</span>
-      <span class="version">v8.14</span>
+      <span class="version">v8.15</span>
     </div>
     <p class="tag">대한민국 관보 · OCR 보정 파생 코퍼스 · 사전 기반 단어 보정</p>
-    <p class="stats" id="stats">loading…</p>
+    <p class="stats" id="stats">불러오는 중…</p>
     <nav class="top">
-      <a href="#" data-view="home" class="active">Home</a>
-      <a href="#" data-view="browse">Browse</a>
-      <a href="#" data-view="about">About</a>
+      <a href="#" data-view="home" class="active">홈</a>
+      <a href="#" data-view="browse">둘러보기</a>
+      <a href="#" data-view="about">안내</a>
       <a class="ext" href="https://github.com/hosungseo/ai-readable-gazette-kr" target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
   </div>
@@ -50,13 +50,13 @@
         </p>
         <div class="meta-box">
           <dl>
-            <dt>Coverage</dt>
+            <dt>범위</dt>
             <dd id="cov-range">—</dd>
-            <dt>Documents</dt>
+            <dt>문서</dt>
             <dd id="cov-docs">—</dd>
-            <dt>Date groups</dt>
+            <dt>발행일 묶음</dt>
             <dd id="cov-dates">—</dd>
-            <dt>Institutions</dt>
+            <dt>기관</dt>
             <dd id="cov-inst">—</dd>
             <dt>Dictionary</dt>
             <dd>v1 → v7</dd>
@@ -65,26 +65,26 @@
       </div>
 
       <section class="block">
-        <h2>Start here</h2>
-        <p class="sub">suggested entry points · one click to jump</p>
+        <h2>바로 가기</h2>
+        <p class="sub">추천 진입점 · 한 번 눌러 이동</p>
         <div id="spotlight" class="spotlight"></div>
       </section>
 
       <section class="block">
-        <h2>Timeline</h2>
-        <p class="sub">month-by-month density · darker = more documents · click a bar to jump</p>
+        <h2>시계열</h2>
+        <p class="sub">월별 밀도 · 진할수록 문서 수 많음 · 막대를 누르면 이동</p>
         <div id="heatmap" class="heatmap"></div>
       </section>
 
       <section class="block">
-        <h2>Most recent</h2>
-        <p class="sub">latest date groups · click a date to open the full list</p>
+        <h2>최신 발행일</h2>
+        <p class="sub">최신 발행일 묶음 · 날짜를 누르면 전체 목록 열기</p>
         <div id="recent-list" class="recent-list"></div>
       </section>
 
       <section class="block">
-        <h2>Institutions</h2>
-        <p class="sub">grouped by government branch · expand to see individual agencies</p>
+        <h2>기관</h2>
+        <p class="sub">정부 계통별 분류 · 펼치면 개별 기관 보기</p>
         <div id="inst-tree" class="inst-tree"></div>
       </section>
 
@@ -93,17 +93,17 @@
     <!-- ============ BROWSE ============ -->
     <section id="view-browse" class="view">
       <div class="browse-layout">
-        <aside class="sidebar" aria-label="corpus navigation">
+        <aside class="sidebar" aria-label="관보 탐색">
           <div class="tabs" role="tablist">
-            <button data-tab="dates" class="active" role="tab" aria-selected="true">Dates</button>
-            <button data-tab="inst" role="tab" aria-selected="false">Institutions</button>
-            <button data-tab="search" role="tab" aria-selected="false">Search</button>
+            <button data-tab="dates" class="active" role="tab" aria-selected="true">날짜</button>
+            <button data-tab="inst" role="tab" aria-selected="false">기관</button>
+            <button data-tab="search" role="tab" aria-selected="false">검색</button>
           </div>
           <div id="year-jumper" class="year-jumper"></div>
           <div id="cat-pills" class="cat-pills" hidden></div>
           <div class="filter-row">
-            <input type="search" id="filter" class="filter" placeholder="jump to a date…" aria-label="filter">
-            <button id="filter-clear" class="filter-clear" type="button" aria-label="clear filter" hidden>×</button>
+            <input type="search" id="filter" class="filter" placeholder="날짜로 찾기…" aria-label="찾기">
+            <button id="filter-clear" class="filter-clear" type="button" aria-label="검색 지우기" hidden>×</button>
             <span class="filter-count" id="filter-count" aria-live="polite"></span>
           </div>
           <div id="list-dates" class="list active" role="tabpanel"></div>
@@ -112,22 +112,22 @@
         </aside>
 
         <section class="main-pane">
-          <button id="browse-back-btn" class="browse-back" hidden>← filters</button>
+          <button id="browse-back-btn" class="browse-back" hidden>← 조건</button>
           <div id="main-head" class="main-head">
-            <h2>Browse</h2>
-            <p class="sub">select a date, an institution, or search by title</p>
+            <h2>둘러보기</h2>
+            <p class="sub">날짜, 기관, 제목 검색으로 찾기</p>
           </div>
 
           <div id="docs-list" class="docs-list">
-            <p class="hint">LEFT: pick a date or institution, or switch to Search.</p>
+            <p class="hint">날짜나 기관을 고르거나 검색 탭으로 전환하세요.</p>
           </div>
 
           <article id="reader" class="reader" hidden>
             <div class="reader-head">
-              <button class="back" id="back-btn" aria-label="back to list">← back</button>
-              <div class="reader-quick-nav" aria-label="quick navigation">
-                <button class="quick-nav-btn" id="prev-doc-top" title="Previous document (k)" aria-label="previous">‹</button>
-                <button class="quick-nav-btn" id="next-doc-top" title="Next document (j)" aria-label="next">›</button>
+              <button class="back" id="back-btn" aria-label="목록으로 돌아가기">← 목록</button>
+              <div class="reader-quick-nav" aria-label="빠른 이동">
+                <button class="quick-nav-btn" id="prev-doc-top" title="이전 문서 (k)" aria-label="이전 문서">‹</button>
+                <button class="quick-nav-btn" id="next-doc-top" title="다음 문서 (j)" aria-label="다음 문서">›</button>
               </div>
               <div class="meta">
                 <span id="reader-date"></span>
@@ -138,21 +138,21 @@
                 <span id="reader-badge-slot"></span>
               </div>
               <div class="reader-actions">
-                <button class="reader-btn" id="copy-link-btn" title="Copy permalink">copy link</button>
-                <a class="reader-btn primary" id="reader-raw" href="#" target="_blank" rel="noopener">raw md ↗</a>
+                <button class="reader-btn" id="copy-link-btn" title="Copy permalink">링크 복사</button>
+                <a class="reader-btn primary" id="reader-raw" href="#" target="_blank" rel="noopener">원문 md ↗</a>
               </div>
             </div>
             <h2 class="doc-title" id="reader-title">—</h2>
             <div id="reader-warning"></div>
             <div id="reader-toc"></div>
             <div id="reader-body" class="markdown"></div>
-            <nav class="reader-nav" id="reader-nav" aria-label="document navigation">
+            <nav class="reader-nav" id="reader-nav" aria-label="문서 이동">
               <button id="prev-doc" disabled>
-                <span class="nav-label">← prev (k)</span>
+                <span class="nav-label">← 이전 문서 (k)</span>
                 <span class="nav-text">—</span>
               </button>
               <button id="next-doc" class="nav-next" disabled>
-                <span class="nav-label">next (j) →</span>
+                <span class="nav-label">다음 문서 (j) →</span>
                 <span class="nav-text">—</span>
               </button>
             </nav>
@@ -164,7 +164,7 @@
     <!-- ============ ABOUT ============ -->
     <section id="view-about" class="view">
       <article class="prose">
-        <h1>About</h1>
+        <h1>안내</h1>
         <p class="prose-lede">
           관보는 이미 공개되어 있다. 이 프로젝트는 "무엇을 더 공개할 것인가"가 아니라
           "이미 공개된 것을 어떻게 하면 실제로 활용할 수 있게 만들 것인가"에 답하려는
@@ -271,39 +271,39 @@ derived/readable-corrected/ + GitHub Pages 리더
     &nbsp;·&nbsp;
     <a href="http://gwanbo.go.kr" target="_blank" rel="noopener">원천: 행정안전부 전자관보</a>
     &nbsp;·&nbsp;
-    <a href="https://github.com/hosungseo/ai-readable-gazette-kr/blob/main/NOTICE.md" target="_blank" rel="noopener">data notice</a>
+    <a href="https://github.com/hosungseo/ai-readable-gazette-kr/blob/main/NOTICE.md" target="_blank" rel="noopener">데이터 안내</a>
     &nbsp;·&nbsp;
-    <a href="#" id="show-shortcuts">keyboard shortcuts (?)</a>
+    <a href="#" id="show-shortcuts">단축키 (?)</a>
   </div>
 </footer>
 
 <!-- Keyboard shortcut help overlay -->
-<div id="kbd-hint" class="kbd-hint" role="dialog" aria-label="keyboard shortcuts">
+<div id="kbd-hint" class="kbd-hint" role="dialog" aria-label="단축키">
   <div class="panel">
-    <h3>Keyboard shortcuts</h3>
+    <h3>단축키</h3>
     <table>
-      <tr><td><kbd>/</kbd></td><td>focus filter / search</td></tr>
-      <tr><td><kbd>Esc</kbd></td><td>clear filter or close reader</td></tr>
-      <tr><td><kbd>j</kbd> <kbd>↓</kbd></td><td>next document</td></tr>
-      <tr><td><kbd>k</kbd> <kbd>↑</kbd></td><td>previous document</td></tr>
-      <tr><td><kbd>Enter</kbd></td><td>open focused item</td></tr>
-      <tr><td><kbd>g</kbd> <kbd>h</kbd></td><td>go home</td></tr>
-      <tr><td><kbd>g</kbd> <kbd>b</kbd></td><td>go browse</td></tr>
-      <tr><td><kbd>g</kbd> <kbd>a</kbd></td><td>go about</td></tr>
-      <tr><td><kbd>?</kbd></td><td>this help</td></tr>
+      <tr><td><kbd>/</kbd></td><td>검색창으로 이동</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>검색 지우기 또는 리더 닫기</td></tr>
+      <tr><td><kbd>j</kbd> <kbd>↓</kbd></td><td>다음 문서</td></tr>
+      <tr><td><kbd>k</kbd> <kbd>↑</kbd></td><td>이전 문서</td></tr>
+      <tr><td><kbd>Enter</kbd></td><td>선택 항목 열기</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>h</kbd></td><td>홈으로 이동</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>b</kbd></td><td>둘러보기로 이동</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>a</kbd></td><td>안내로 이동</td></tr>
+      <tr><td><kbd>?</kbd></td><td>이 도움말</td></tr>
     </table>
-    <div class="close-hint">press <kbd>Esc</kbd> or <kbd>?</kbd> to close</div>
+    <div class="close-hint"><kbd>Esc</kbd> 또는 <kbd>?</kbd> 로 닫기</div>
   </div>
 </div>
 
 <!-- Floating back-to-top button -->
-<button id="scroll-top" class="scroll-top" aria-label="scroll to top" title="back to top" hidden>↑</button>
+<button id="scroll-top" class="scroll-top" aria-label="맨 위로 이동" title="맨 위로 이동" hidden>↑</button>
 
 <!-- Toast -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.11/dist/purify.min.js"></script>
-<script src="app.js?v=20260412-mobile-header-compact-2"></script>
+<script src="app.js?v=20260412-korean-ui-copy"></script>
 </body>
 </html>

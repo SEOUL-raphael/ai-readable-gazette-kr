@@ -58,8 +58,8 @@ let currentDocIdx = -1;
 
 // Spotlight: curated editorial entry points
 const SPOTLIGHT = [
-  { num: '01', label: 'Latest gazette',
-    hint: 'most recent date group',
+  { num: '01', label: '최신 관보',
+    hint: '가장 최근 발행일 묶음',
     kind: 'latest-date' },
   { num: '02', label: '국토교통부',
     hint: '가장 많은 문서를 발간한 기관 · 15K+',
@@ -87,7 +87,7 @@ async function init() {
     if (!resp.ok) throw new Error('meta.json fetch failed');
     META = await resp.json();
   } catch (e) {
-    $('#stats').textContent = `meta load failed: ${e.message}`;
+    $('#stats').textContent = `메타데이터 불러오기 실패: ${e.message}`;
     return;
   }
   renderStats();
@@ -104,11 +104,11 @@ async function init() {
 function renderStats() {
   const m = META;
   const full =
-    `${m.total_docs.toLocaleString()} documents · ${m.date_count.toLocaleString()} date groups · ` +
-    `${m.institution_count.toLocaleString()} institutions · ` +
+    `문서 ${m.total_docs.toLocaleString()}건 · 발행일 묶음 ${m.date_count.toLocaleString()}개 · ` +
+    `기관 ${m.institution_count.toLocaleString()}곳 · ` +
     `${m.date_range[0]} → ${m.date_range[1]}`;
   const compact =
-    `${m.total_docs.toLocaleString()} docs · ${m.institution_count.toLocaleString()} inst. · ` +
+    `문서 ${m.total_docs.toLocaleString()}건 · 기관 ${m.institution_count.toLocaleString()}곳 · ` +
     `${m.date_range[0].slice(0, 4)}–${m.date_range[1].slice(0, 4)}`;
   const statsEl = $('#stats');
   statsEl.textContent = window.matchMedia('(max-width: 820px)').matches ? compact : full;
@@ -175,11 +175,11 @@ function renderHeatmap() {
     bar.style.height = `${Math.max(4, norm * 100)}%`;
     bar.dataset.ym = d.ym;
     bar.dataset.count = d.count;
-    bar.title = `${d.ym} · ${d.count.toLocaleString()} documents`;
+    bar.title = `${d.ym} · ${d.count.toLocaleString()}건`;
     bar.tabIndex = 0;
     bar.addEventListener('mouseenter', () => {
       $('#heatmap .hm-caption').textContent =
-        `${d.ym} · ${d.count.toLocaleString()} documents`;
+        `${d.ym} · ${d.count.toLocaleString()}건`;
     });
     bar.addEventListener('click', () => jumpToMonth(d.ym));
     bar.addEventListener('keydown', e => {
@@ -228,7 +228,7 @@ function renderRecent() {
       `<a class="row-rich" href="#browse/date/${d.date}">
         <div class="head">
           <span class="date">${d.date}</span>
-          <span class="count">${d.count} docs</span>
+          <span class="count">${d.count}건</span>
         </div>
       </a>`
     ).join('');
@@ -241,7 +241,7 @@ function renderRecent() {
       return `<a class="row-rich" href="#browse/date/${r.date}">
         <div class="head">
           <span class="date">${r.date}</span>
-          <span class="count">${r.count} docs</span>
+          <span class="count">${r.count}건</span>
         </div>
         <ul class="samples">${samples}</ul>
       </a>`;
@@ -268,7 +268,7 @@ function renderInstTree() {
       </div>`).join('');
     const rest = cat.items.length > 30
       ? `<div class="inst-row" data-cat-rest="${escapeAttr(cat.cat)}" tabindex="0" style="color:var(--hush)">
-          <span>… +${cat.items.length - 30} more (view all)</span>
+          <span>… +${cat.items.length - 30}개 더 (전체 보기)</span>
           <span class="cnt">→</span>
          </div>`
       : '';
@@ -368,7 +368,7 @@ function renderCategoryPills() {
   const pills = $('#cat-pills');
   if (!pills) return;
   const order = META.category_order || [];
-  const html = [`<button data-cat="" class="active">ALL</button>`]
+  const html = [`<button data-cat="" class="active">전체</button>`]
     .concat(order.map(c => `<button data-cat="${escapeAttr(c)}">${escapeHtml(c)}</button>`))
     .join('');
   pills.innerHTML = html;
@@ -400,7 +400,7 @@ function selectDateTab() {
   $('#year-jumper').hidden = false;
   $('#cat-pills').hidden = true;
   setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button')?.dataset.year || ''));
-  $('#filter').placeholder = 'jump to a date…';
+  $('#filter').placeholder = '날짜로 찾기…';
   applyFilter($('#filter').value);
 }
 function selectInstTab() {
@@ -414,7 +414,7 @@ function selectInstTab() {
     el.classList.toggle('active', el.id === 'list-inst'));
   $('#year-jumper').hidden = true;
   $('#cat-pills').hidden = false;
-  $('#filter').placeholder = 'filter institutions…';
+  $('#filter').placeholder = '기관명으로 찾기…';
   applyFilter($('#filter').value);
 }
 
@@ -437,7 +437,7 @@ function selectSearchTab() {
     el.classList.toggle('active', el.id === 'list-search'));
   $('#year-jumper').hidden = true;
   $('#cat-pills').hidden = true;
-  $('#filter').placeholder = 'search titles…';
+  $('#filter').placeholder = '제목으로 찾기…';
   updateFilterCount(0, 0, true);
   if (!$('#filter').value) {
     $('#list-search').innerHTML =
@@ -502,13 +502,13 @@ function updateFilterCount(shown, total, hide) {
 async function ensureTitles() {
   if (TITLES) return TITLES;
   const target = $('#list-search');
-  if (target) target.innerHTML = `<p class="search-hint"><span class="spinner"></span>loading title index…</p>`;
+  if (target) target.innerHTML = `<p class="search-hint"><span class="spinner"></span>제목 색인 불러오는 중…</p>`;
   try {
     const resp = await fetch(`${DATA_BASE}/titles.json`);
     if (!resp.ok) throw new Error('titles fetch failed');
     TITLES = await resp.json();
   } catch (e) {
-    if (target) target.innerHTML = `<p class="search-hint">load failed: ${escapeHtml(e.message)}</p>`;
+    if (target) target.innerHTML = `<p class="search-hint">불러오기 실패: ${escapeHtml(e.message)}</p>`;
     return null;
   }
   return TITLES;
@@ -544,7 +544,7 @@ function handleSearch(q) {
       }
     }
     if (!hits.length) {
-      list.innerHTML = `<p class="search-hint">no matches</p>`;
+      list.innerHTML = `<p class="search-hint">검색 결과 없음</p>`;
       return;
     }
     list.innerHTML = hits.map(h =>
@@ -589,7 +589,7 @@ async function selectDate(date) {
 async function loadDateDocs(date) {
   const head = $('#main-head');
   const list = $('#docs-list');
-  head.innerHTML = `<h2>${date}</h2><p class="sub"><span class="spinner"></span>loading…</p>`;
+  head.innerHTML = `<h2>${date}</h2><p class="sub"><span class="spinner"></span>불러오는 중…</p>`;
   list.innerHTML = renderDocsListSkeleton(6);
   try {
     const resp = await fetch(`${DATA_BASE}/dates/${date}.json`);
@@ -602,10 +602,10 @@ async function loadDateDocs(date) {
     currentDocIdx = -1;
     renderDocsList(data.docs, {
       title: date,
-      sub: `${data.docs.length} documents`,
+      sub: `문서 ${data.docs.length}건`,
     });
   } catch (e) {
-    head.innerHTML = `<h2>${date}</h2><p class="sub">load failed: ${escapeHtml(e.message)}</p>`;
+    head.innerHTML = `<h2>${date}</h2><p class="sub">불러오기 실패: ${escapeHtml(e.message)}</p>`;
     list.innerHTML = '';
   }
 }
@@ -629,18 +629,18 @@ async function selectInst(inst) {
 async function loadInstDocs(inst) {
   const head = $('#main-head');
   const list = $('#docs-list');
-  head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub"><span class="spinner"></span>collecting…</p>`;
+  head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub"><span class="spinner"></span>수집 중…</p>`;
   list.innerHTML = renderDocsListSkeleton(8);
 
   const data = await ensureTitles();
   if (!data) {
-    head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub">index load failed</p>`;
+    head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub">색인 불러오기 실패</p>`;
     return;
   }
   const { dates, insts, docs } = data;
   const targetIdx = insts.indexOf(inst);
   if (targetIdx < 0) {
-    head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub">not found</p>`;
+    head.innerHTML = `<h2>${escapeHtml(inst)}</h2><p class="sub">찾을 수 없음</p>`;
     return;
   }
   const collected = [];
@@ -662,7 +662,7 @@ async function loadInstDocs(inst) {
   currentDocIdx = -1;
   renderDocsList(collected, {
     title: inst,
-    sub: `${collected.length} documents · ${uniqueDateCount} date groups`,
+    sub: `문서 ${collected.length}건 · 날짜 묶음 ${uniqueDateCount}개`,
     showDate: true,
   });
 }
@@ -677,7 +677,7 @@ function renderDocsList(docs, opts) {
     `<h2>${escapeHtml(opts.title)}</h2>
      <p class="sub">${escapeHtml(opts.sub || '')}</p>`;
   if (!docs.length) {
-    list.innerHTML = `<p class="hint">no documents</p>`;
+    list.innerHTML = `<p class="hint">문서 없음</p>`;
     return;
   }
   const showDate = !!opts.showDate;
@@ -743,7 +743,7 @@ async function openDoc(date, file) {
   $('#reader-inst').textContent = inst;
   $('#reader-n').textContent = serial ? `#${serial}` : '';
   $('#reader-title').textContent = title;
-  $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>loading document…</p>';
+  $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>문서 불러오는 중…</p>';
   $('#reader-warning').innerHTML = '';
   $('#reader-toc').innerHTML = '';
 
@@ -787,7 +787,7 @@ async function openDoc(date, file) {
     }
     setHash(`doc=${encodeURIComponent(date)}/${encodeURIComponent(file)}`);
   } catch (e) {
-    $('#reader-body').innerHTML = `<p class="hint">load failed: ${escapeHtml(e.message)}</p>`;
+    $('#reader-body').innerHTML = `<p class="hint">불러오기 실패: ${escapeHtml(e.message)}</p>`;
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -803,7 +803,7 @@ function renderMarkdown(md) {
   try {
     dirty = marked.parse(md, { breaks: false });
   } catch (e) {
-    $('#reader-body').innerHTML = `<p class="hint">render failed: ${escapeHtml(e.message)}</p>`;
+    $('#reader-body').innerHTML = `<p class="hint">렌더링 실패: ${escapeHtml(e.message)}</p>`;
     return;
   }
   let clean;
@@ -841,13 +841,13 @@ function showLargeFileWarning(md, size, url) {
       원본은 표와 본문이 깨지지 않도록 그대로 유지됩니다.
       <div class="actions">
         <button id="force-load">이대로 렌더</button>
-        <a class="reader-btn" href="${url}" target="_blank" rel="noopener">raw md 열기 ↗</a>
+        <a class="reader-btn" href="${url}" target="_blank" rel="noopener">원문 md 열기 ↗</a>
       </div>
     </div>`;
   $('#reader-body').innerHTML = '';
   $('#force-load').addEventListener('click', () => {
     $('#reader-warning').innerHTML = '';
-    $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>rendering…</p>';
+    $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>렌더링 중…</p>';
     setTimeout(() => renderMarkdown(preprocessReaderMarkdown(md)), 30);
   });
 }
@@ -868,8 +868,8 @@ function buildTOC() {
   }).join('');
   tocHost.innerHTML = `<div class="toc-box">
     <div class="toc-head">
-      <div class="toc-title">Contents · ${headings.length} sections</div>
-      <button class="toc-toggle" type="button" aria-expanded="true">hide</button>
+      <div class="toc-title">목차 · ${headings.length}개 항목</div>
+      <button class="toc-toggle" type="button" aria-expanded="true">접기</button>
     </div>
     <ul>${items}</ul>
   </div>`;
@@ -878,7 +878,7 @@ function buildTOC() {
   const toggleBtn = tocHost.querySelector('.toc-toggle');
   toggleBtn.addEventListener('click', () => {
     const collapsed = box.classList.toggle('collapsed');
-    toggleBtn.textContent = collapsed ? 'show' : 'hide';
+    toggleBtn.textContent = collapsed ? '펼치기' : '접기';
     toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
   });
   // The whole header area also acts as a click target
@@ -993,8 +993,8 @@ function setBrowseSelectionState(open) {
 function resetBrowseMainPane() {
   const head = $('#main-head');
   const list = $('#docs-list');
-  if (head) head.innerHTML = `<h2>Browse</h2><p class="sub">select a date, an institution, or search by title</p>`;
-  if (list) list.innerHTML = `<p class="hint">Choose a date or institution from the filters.</p>`;
+  if (head) head.innerHTML = `<h2>둘러보기</h2><p class="sub">날짜, 기관, 제목 검색으로 찾기</p>`;
+  if (list) list.innerHTML = `<p class="hint">조건에서 날짜나 기관을 고르세요.</p>`;
 }
 
 function clearBrowseSelection() {
@@ -1136,7 +1136,7 @@ function closeReader() {
 
 function copyPermalink() {
   const url = location.href;
-  const done = () => showToast('link copied');
+  const done = () => showToast('링크를 복사했습니다');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(done, () => {
       fallbackCopy(url); done();
