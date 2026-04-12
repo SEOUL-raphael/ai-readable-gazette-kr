@@ -7,6 +7,7 @@
 > **Live reader** → <https://hosungseo.github.io/ai-readable-gazette-kr/>
 
 > **Related writing** → [공공 투명성의 다음 단계는 AI-readable이다](https://open.substack.com/pub/gongpenclaw/p/ai-readable?r=7xa8nx&utm_medium=ios)
+> **Threads profile** → <https://www.threads.com/@gongpenclaw?igshid=NTc4MTIwNjQ2YQ==>
 >
 > **주의**: 이 코퍼스는 관보 원본 PDF를 opendataloader OCR로 변환하고 추가 보정한 파생본입니다. 공식적으로 활용할 때에는 반드시 원본 PDF를 함께 확인해야 합니다.
 
