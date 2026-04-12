@@ -5,6 +5,7 @@
 > *AI-readable corrected corpus of the Korean government gazette (관보) — 128,403 documents, dictionary-based OCR fixup, static reader.*
 
 > **Live reader** → <https://hosungseo.github.io/ai-readable-gazette-kr/>
+> **Related writing** → [공공 투명성의 다음 단계는 AI-readable이다](https://open.substack.com/pub/gongpenclaw/p/ai-readable?r=7xa8nx&utm_medium=ios)
 
 ```
 128,403 documents · 1,474 date groups · 2020-01-02 → 2026-04-07 · dictionary v8
