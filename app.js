@@ -102,10 +102,16 @@ async function init() {
 
 function renderStats() {
   const m = META;
-  $('#stats').textContent =
+  const full =
     `${m.total_docs.toLocaleString()} documents · ${m.date_count.toLocaleString()} date groups · ` +
     `${m.institution_count.toLocaleString()} institutions · ` +
     `${m.date_range[0]} → ${m.date_range[1]}`;
+  const compact =
+    `${m.total_docs.toLocaleString()} docs · ${m.institution_count.toLocaleString()} inst. · ` +
+    `${m.date_range[0].slice(0, 4)}–${m.date_range[1].slice(0, 4)}`;
+  const statsEl = $('#stats');
+  statsEl.textContent = window.matchMedia('(max-width: 820px)').matches ? compact : full;
+  statsEl.title = full;
   $('#cov-range').textContent = `${m.date_range[0]} → ${m.date_range[1]}`;
   $('#cov-docs').textContent  = m.total_docs.toLocaleString();
   $('#cov-dates').textContent = m.date_count.toLocaleString();
