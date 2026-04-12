@@ -337,7 +337,7 @@ function renderYearJumper() {
       }
     });
   });
-  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : (years[0] || ''));
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : (years[years.length - 1] || ''));
 }
 
 function setYearJumperActive(year) {
@@ -380,7 +380,7 @@ function selectDateTab() {
     el.classList.toggle('active', el.id === 'list-dates'));
   $('#year-jumper').hidden = false;
   $('#cat-pills').hidden = true;
-  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button')?.dataset.year || ''));
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button:last-child')?.dataset.year || ''));
   $('#filter').placeholder = 'jump to a date…';
   applyFilter($('#filter').value);
 }
