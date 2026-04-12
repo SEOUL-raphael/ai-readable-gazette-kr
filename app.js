@@ -327,6 +327,7 @@ function renderYearJumper() {
   jumper.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
       const y = btn.dataset.year;
+      setYearJumperActive(y);
       const list = $('#list-dates');
       const target = list.querySelector(`.item[data-date^="${y}"]`);
       if (target) {
@@ -336,6 +337,12 @@ function renderYearJumper() {
       }
     });
   });
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : (years[0] || ''));
+}
+
+function setYearJumperActive(year) {
+  $$('#year-jumper button').forEach(b =>
+    b.classList.toggle('active', (b.dataset.year || '') === (year || '')));
 }
 
 function renderCategoryPills() {
@@ -373,6 +380,7 @@ function selectDateTab() {
     el.classList.toggle('active', el.id === 'list-dates'));
   $('#year-jumper').hidden = false;
   $('#cat-pills').hidden = true;
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button')?.dataset.year || ''));
   $('#filter').placeholder = 'jump to a date…';
   applyFilter($('#filter').value);
 }
@@ -540,6 +548,7 @@ async function selectDate(date) {
   setBrowseReaderState(false);
   setBrowseSelectionState(true);
   selectDateTab();
+  setYearJumperActive(date.slice(0, 4));
   currentDate = date;
   currentInst = null;
   markSelected('#list-dates', `[data-date="${date}"]`);
