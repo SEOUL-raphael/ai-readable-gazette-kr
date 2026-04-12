@@ -565,7 +565,7 @@ async function loadDateDocs(date) {
     currentDocIdx = -1;
     renderDocsList(data.docs, {
       title: date,
-      sub: `${data.docs.length} documents · ${date}`,
+      sub: `${data.docs.length} documents`,
     });
   } catch (e) {
     head.innerHTML = `<h2>${date}</h2><p class="sub">load failed: ${escapeHtml(e.message)}</p>`;
@@ -620,11 +620,12 @@ async function loadInstDocs(inst) {
     }
   }
   collected.sort((a, b) => (b.date + b.n).localeCompare(a.date + a.n));
+  const uniqueDateCount = new Set(collected.map(d => d.date)).size;
   currentDocs = collected.slice();
   currentDocIdx = -1;
   renderDocsList(collected, {
     title: inst,
-    sub: `${collected.length} documents · across ${META.date_count} date groups`,
+    sub: `${collected.length} documents · ${uniqueDateCount} date groups`,
     showDate: true,
   });
 }

@@ -528,6 +528,10 @@ section.block > .sub {
   border-color: var(--ink);
   color: var(--ink);
 }
+.browse-back:focus-visible {
+  outline: 2px solid var(--civic);
+  outline-offset: 2px;
+}
 .main-head {
   padding-bottom: 14px;
   margin-bottom: 20px;
@@ -863,6 +867,23 @@ footer.site a:hover { color: var(--ink); }
   #view-browse.selection-open:not(.reader-open) .browse-back {
     display: inline-flex;
     align-items: center;
+    position: sticky;
+    top: 12px;
+    z-index: 6;
+    margin-bottom: 12px;
+  }
+  #view-browse.selection-open:not(.reader-open) .main-head {
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  #view-browse.selection-open:not(.reader-open) .main-head h2 {
+    font-size: 20px;
+  }
+  #view-browse.selection-open:not(.reader-open) .doc-row {
+    padding: 13px 0;
+  }
+  #view-browse.selection-open:not(.reader-open) .doc-row .meta {
+    margin-bottom: 6px;
   }
   .home-intro { grid-template-columns: 1fr; gap: 24px; }
   .reader { padding: 24px 18px 32px; }
