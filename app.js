@@ -373,7 +373,7 @@ function selectDateTab() {
     el.classList.toggle('active', el.id === 'list-dates'));
   $('#year-jumper').hidden = false;
   $('#cat-pills').hidden = true;
-  $('#filter').placeholder = 'filter dates…';
+  $('#filter').placeholder = 'jump to a date…';
   applyFilter($('#filter').value);
 }
 function selectInstTab() {
@@ -410,7 +410,7 @@ function selectSearchTab() {
     el.classList.toggle('active', el.id === 'list-search'));
   $('#year-jumper').hidden = true;
   $('#cat-pills').hidden = true;
-  $('#filter').placeholder = 'search titles (2+ chars)…';
+  $('#filter').placeholder = 'search titles…';
   updateFilterCount(0, 0, true);
   if (!$('#filter').value) {
     $('#list-search').innerHTML =
@@ -418,8 +418,10 @@ function selectSearchTab() {
         제목 검색.<br>2글자 이상 입력.<br>상위 50건까지 표시.
       </p>`;
   }
-  // Auto-focus the input so the user can start typing immediately.
-  setTimeout(() => $('#filter').focus(), 0);
+  // On desktop, jump straight into typing. On mobile, avoid forcing the keyboard open.
+  if (window.matchMedia('(min-width: 821px)').matches) {
+    setTimeout(() => $('#filter').focus(), 0);
+  }
 }
 
 function applyFilter(q) {
