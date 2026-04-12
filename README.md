@@ -4,11 +4,10 @@
 
 > *AI-readable corrected corpus of the Korean government gazette (관보) — 128,403 documents, dictionary-based OCR fixup, static reader.*
 
-> **Live reader** → <https://hosungseo.github.io/ai-readable-gazette-kr/>
+> **라이브 리더** → <https://hosungseo.github.io/ai-readable-gazette-kr/>
 
-> **Related writing** → [공공 투명성의 다음 단계는 AI-readable이다](https://open.substack.com/pub/gongpenclaw/p/ai-readable?r=7xa8nx&utm_medium=ios)
-
-> **Threads profile** → <https://www.threads.com/@gongpenclaw?igshid=NTc4MTIwNjQ2YQ==>
+> **관련 글** → [공공 투명성의 다음 단계는 AI-readable이다](https://open.substack.com/pub/gongpenclaw/p/ai-readable?r=7xa8nx&utm_medium=ios)
+> **스레드 프로필** → <https://www.threads.com/@gongpenclaw?igshid=NTc4MTIwNjQ2YQ==>
 >
 > **주의**: 이 코퍼스는 관보 원본 PDF를 opendataloader OCR로 변환하고 추가 보정한 파생본입니다. 공식적으로 활용할 때에는 반드시 원본 PDF를 함께 확인해야 합니다.
 
@@ -16,9 +15,9 @@
 128,403 documents · 1,474 date groups · 2020-01-02 → 2026-04-07 · dictionary v8
 ```
 
-- **Code**: [MIT License](LICENSE)
-- **Gazette data**: 저작권법 제7조에 따라 보호받지 못하는 저작물 · 자유 이용 — see [NOTICE.md](NOTICE.md)
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **코드**: [MIT License](LICENSE)
+- **관보 데이터**: 저작권법 제7조에 따라 보호받지 못하는 저작물 · 자유 이용 — see [NOTICE.md](NOTICE.md)
+- **변경이력**: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
@@ -67,21 +66,21 @@
 
 ---
 
-## 라이브 리더 (GitHub Pages)
+## 라이브 리더
 
 <https://hosungseo.github.io/ai-readable-gazette-kr/>
 
 정적 HTML 리더. 빌드 툴 없이 바로 열린다.
 
-- **Home**: 월별 밀도 히트맵, 최근 날짜 + 샘플 제목, 기관 분류 트리, 5개 큐레이션 엔트리 포인트
-- **Browse**: 날짜 / 기관 / 제목 검색 탭, 연도 점프, 카테고리 필터, 문서 타입 배지, 인라인 리더 + 자동 TOC
-- **Reader**: prev/next 네비, copy permalink, 대용량 가드, DOMPurify 로 sanitize 된 markdown 렌더
-- **About**: 방법론, 보정 사전 v4~v8 내역, 원칙
+- **홈**: 월별 밀도 히트맵, 최근 날짜 + 샘플 제목, 기관 분류 트리, 5개 큐레이션 엔트리 포인트
+- **둘러보기**: 날짜 / 기관 / 제목 검색 탭, 연도 점프, 카테고리 필터, 문서 타입 배지, 인라인 리더 + 자동 TOC
+- **문서 리더**: 이전/다음 네비, 링크 복사, 대용량 가드, DOMPurify 로 sanitize 된 markdown 렌더
+- **안내**: 방법론, 보정 사전 v4~v8 내역, 원칙
 - **키보드 단축키**: `/ Esc j k Enter ? g h g b g a` — `?` 키로 도움말
 
 본문은 `Noto Serif KR` 로 렌더, 메타·사이드바는 `Pretendard`, ID·버전은 `JetBrains Mono`. `prefers-color-scheme` 기반 다크 모드, `@media print` 로 본문만 출력 가능. 모바일 터치 타깃 iOS HIG 준수.
 
-Pages 는 별도 `gh-pages` 브랜치에서 서빙된다. 코퍼스 전량(2.4GB)을 체크아웃하지 않으므로 빌드가 가볍다. raw md 본문은 실행 시점에 `raw.githubusercontent.com` 에서 fetch 된다.
+GitHub Pages 는 별도 `gh-pages` 브랜치에서 서빙된다. 코퍼스 전량(2.4GB)을 체크아웃하지 않으므로 빌드가 가볍다. 원문 md 본문은 실행 시점에 `raw.githubusercontent.com` 에서 fetch 된다.
 
 ---
 
@@ -89,7 +88,7 @@ Pages 는 별도 `gh-pages` 브랜치에서 서빙된다. 코퍼스 전량(2.4GB
 
 ### 1. 그냥 읽기 (사람)
 
-라이브 리더 열기 → Home 에서 Start Here 5 카드 중 하나 클릭 → 문서 리스트 → 클릭. 본문이 인라인으로 렌더된다.
+라이브 리더 열기 → 홈에서 바로 가기 5개 카드 중 하나 클릭 → 문서 리스트 → 클릭. 본문이 인라인으로 렌더된다.
 
 ### 2. 다운스트림 LLM / NLP
 
