@@ -490,9 +490,9 @@ function updateFilterCount(shown, total, hide) {
     return;
   }
   if (shown === total) {
-    el.textContent = `${total.toLocaleString()}`;
+    el.textContent = `총 ${total.toLocaleString()}건`;
   } else {
-    el.textContent = `${shown.toLocaleString()} / ${total.toLocaleString()}`;
+    el.textContent = `${shown.toLocaleString()}건 / ${total.toLocaleString()}건`;
   }
 }
 
@@ -841,7 +841,7 @@ function showLargeFileWarning(md, size, url) {
       원본은 표와 본문이 깨지지 않도록 그대로 유지됩니다.
       <div class="actions">
         <button id="force-load">이대로 렌더</button>
-        <a class="reader-btn" href="${url}" target="_blank" rel="noopener">원문 md 열기 ↗</a>
+        <a class="reader-btn" href="${url}" target="_blank" rel="noopener">원문 파일 열기 ↗</a>
       </div>
     </div>`;
   $('#reader-body').innerHTML = '';
