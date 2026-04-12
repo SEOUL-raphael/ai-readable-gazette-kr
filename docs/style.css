@@ -977,6 +977,7 @@ footer.site a:hover { color: var(--ink); }
   .sidebar .list .item { padding: 13px 14px; min-height: 48px; }
   .sidebar .tabs button { padding: 15px 0; min-height: 48px; }
   .sidebar .filter { padding: 14px; font-size: 14px; }
+  .filter-row .filter-clear { min-width: 42px; }
   .year-jumper button { padding: 12px 0; min-height: 44px; }
   .cat-pills button { padding: 7px 12px; min-height: 34px; }
   .doc-row { padding: 16px 0; }
@@ -1594,6 +1595,25 @@ footer.site a:hover { color: var(--ink); }
 }
 .filter-row .filter:focus {
   background: var(--civic-bg);
+}
+.filter-row .filter-clear {
+  border: 0;
+  background: var(--canvas);
+  color: var(--hush);
+  padding: 0 10px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.filter-row .filter-clear:hover {
+  color: var(--ink);
+}
+.filter-row .filter-clear:focus-visible {
+  outline: 2px solid var(--civic);
+  outline-offset: -2px;
+}
+.filter-row .filter-clear[hidden] {
+  display: none !important;
 }
 .filter-row .filter-count {
   display: inline-flex;

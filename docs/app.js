@@ -320,7 +320,7 @@ function renderInstSidebar() {
 function renderYearJumper() {
   const jumper = $('#year-jumper');
   if (!jumper) return;
-  const years = [...new Set(META.dates.map(d => d.date.slice(0, 4)))];
+  const years = [...new Set(META.dates.map(d => d.date.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
   jumper.innerHTML = years.map(y =>
     `<button data-year="${y}">${y}</button>`
   ).join('');
@@ -337,12 +337,19 @@ function renderYearJumper() {
       }
     });
   });
-  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : (years[years.length - 1] || ''));
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : (years[0] || ''));
+}
+
+function revealActiveYearButton() {
+  const active = $('#year-jumper button.active');
+  if (!active) return;
+  active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
 }
 
 function setYearJumperActive(year) {
   $$('#year-jumper button').forEach(b =>
     b.classList.toggle('active', (b.dataset.year || '') === (year || '')));
+  revealActiveYearButton();
 }
 
 function renderCategoryPills() {
@@ -380,7 +387,7 @@ function selectDateTab() {
     el.classList.toggle('active', el.id === 'list-dates'));
   $('#year-jumper').hidden = false;
   $('#cat-pills').hidden = true;
-  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button:last-child')?.dataset.year || ''));
+  setYearJumperActive(currentDate ? currentDate.slice(0, 4) : ($('#year-jumper button')?.dataset.year || ''));
   $('#filter').placeholder = 'jump to a date…';
   applyFilter($('#filter').value);
 }
@@ -432,7 +439,14 @@ function selectSearchTab() {
   }
 }
 
+function updateFilterAffordances(q) {
+  const clearBtn = $('#filter-clear');
+  if (!clearBtn) return;
+  clearBtn.hidden = !(q && q.trim());
+}
+
 function applyFilter(q) {
+  updateFilterAffordances(q);
   if (currentTab === 'search') {
     handleSearch(q);
     updateFilterCount(0, 0, true);
@@ -1013,6 +1027,15 @@ function wireUI() {
 
   // filter
   $('#filter').addEventListener('input', e => applyFilter(e.target.value));
+  const filterClearBtn = $('#filter-clear');
+  if (filterClearBtn) {
+    filterClearBtn.addEventListener('click', () => {
+      const input = $('#filter');
+      input.value = '';
+      applyFilter('');
+      if (window.matchMedia('(min-width: 821px)').matches) input.focus();
+    });
+  }
 
   // date/inst clicks
   $('#list-dates').addEventListener('click', e => {
