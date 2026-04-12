@@ -676,8 +676,9 @@ section.block > .sub {
   line-height: 1.85;
   color: var(--ink);
   max-width: 70ch;
+  overflow-wrap: anywhere;
 }
-.markdown p { margin: 0 0 1.15em; }
+.markdown p { margin: 0 0 1.15em; overflow-wrap: anywhere; }
 .markdown h1, .markdown h2, .markdown h3, .markdown h4 {
   font-family: var(--sans);
   margin-top: 1.8em;
@@ -728,7 +729,8 @@ section.block > .sub {
   font-family: var(--sans);
 }
 .markdown ul, .markdown ol { margin: 0 0 1.2em; padding-left: 1.6em; }
-.markdown li { margin-bottom: 0.45em; }
+.markdown li { margin-bottom: 0.45em; overflow-wrap: anywhere; }
+.markdown a { overflow-wrap: anywhere; word-break: break-word; }
 .markdown blockquote {
   border-left: 3px solid var(--line);
   margin: 0 0 1.2em;
