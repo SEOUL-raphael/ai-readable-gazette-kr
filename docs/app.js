@@ -50,6 +50,7 @@ let currentTab = 'dates';
 let currentDate = null;
 let currentInst = null;
 let currentCategory = null;
+let statsResponsiveBound = false;
 
 // Reader navigation context — list of docs + index of currently open doc
 let currentDocs = [];                 // [{date, n, inst, title, file}]
@@ -116,6 +117,11 @@ function renderStats() {
   $('#cov-docs').textContent  = m.total_docs.toLocaleString();
   $('#cov-dates').textContent = m.date_count.toLocaleString();
   $('#cov-inst').textContent  = m.institution_count.toLocaleString();
+
+  if (!statsResponsiveBound) {
+    window.addEventListener('resize', () => renderStats(), { passive: true });
+    statsResponsiveBound = true;
+  }
 }
 
 // ====================================================================
