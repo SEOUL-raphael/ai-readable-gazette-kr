@@ -511,6 +511,23 @@ section.block > .sub {
    Docs list (main pane in browse view)
    ============================================================ */
 .main-pane { min-height: 420px; }
+.browse-back {
+  display: none;
+  margin: 0 0 14px;
+  border: 1px solid var(--line);
+  background: var(--canvas);
+  padding: 6px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-radius: var(--rad);
+}
+.browse-back:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
 .main-head {
   padding-bottom: 14px;
   margin-bottom: 20px;
@@ -831,14 +848,21 @@ footer.site a:hover { color: var(--ink); }
     position: static;
     max-height: 380px;
   }
+  #view-browse.selection-open:not(.reader-open) .browse-layout,
   #view-browse.reader-open .browse-layout {
     gap: 0;
   }
+  #view-browse.selection-open:not(.reader-open) .browse-layout .sidebar,
   #view-browse.reader-open .browse-layout .sidebar {
     display: none;
   }
+  #view-browse.selection-open:not(.reader-open) .main-pane,
   #view-browse.reader-open .main-pane {
     min-height: auto;
+  }
+  #view-browse.selection-open:not(.reader-open) .browse-back {
+    display: inline-flex;
+    align-items: center;
   }
   .home-intro { grid-template-columns: 1fr; gap: 24px; }
   .reader { padding: 24px 18px 32px; }
