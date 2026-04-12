@@ -728,11 +728,25 @@ async function openDoc(date, file) {
     if (!resp.ok) throw new Error(`fetch ${resp.status}`);
     const md = await resp.text();
     const size = new Blob([md]).size;
+    const { meta, body } = splitFrontmatter(md);
+
+    if (meta) {
+      if (meta.publisher) $('#reader-inst').textContent = meta.publisher;
+      if (meta.date) $('#reader-date').textContent = meta.date;
+      if (meta.title) {
+        const displayTitle = cleanTitle(meta.title);
+        $('#reader-title').textContent = displayTitle;
+        const displayBadge = inferType(displayTitle);
+        $('#reader-badge-slot').innerHTML = displayBadge
+          ? ` &nbsp;·&nbsp; <span class="badge ${displayBadge.cls}">${displayBadge.label}</span>`
+          : '';
+      }
+    }
 
     if (size > LARGE_FILE_BYTES) {
-      showLargeFileWarning(md, size, url);
+      showLargeFileWarning(body, size, url);
     } else {
-      renderMarkdown(md);
+      renderMarkdown(preprocessReaderMarkdown(body));
     }
     setHash(`doc=${encodeURIComponent(date)}/${encodeURIComponent(file)}`);
   } catch (e) {
@@ -797,7 +811,7 @@ function showLargeFileWarning(md, size, url) {
   $('#force-load').addEventListener('click', () => {
     $('#reader-warning').innerHTML = '';
     $('#reader-body').innerHTML = '<p class="hint"><span class="spinner"></span>rendering…</p>';
-    setTimeout(() => renderMarkdown(md), 30);
+    setTimeout(() => renderMarkdown(preprocessReaderMarkdown(md)), 30);
   });
 }
 
@@ -1227,6 +1241,33 @@ function escapeHtml(s) {
   ));
 }
 function escapeAttr(s) { return escapeHtml(s); }
+
+function parseFrontmatterBlock(raw) {
+  const meta = {};
+  raw.split(/\r?\n/).forEach(line => {
+    const m = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+    if (!m) return;
+    let value = (m[2] || '').trim();
+    if ((value.startsWith('\"') && value.endsWith('\"')) || (value.startsWith(") && value.endsWith("))) {
+      value = value.slice(1, -1);
+    }
+    meta[m[1]] = value;
+  });
+  return meta;
+}
+
+function splitFrontmatter(md) {
+  const match = md.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n*/);
+  if (!match) return { meta: null, body: md };
+  return {
+    meta: parseFrontmatterBlock(match[1]),
+    body: md.slice(match[0].length),
+  };
+}
+
+function preprocessReaderMarkdown(md) {
+  return md.replace(/^- 원문 PDF:\s*(https?:\/\/\S+)$/gm, '- 원문 PDF: [원문 PDF 열기 ↗]($1)');
+}
 
 function routeFromHash() {
   const h = location.hash.replace(/^#/, '');
