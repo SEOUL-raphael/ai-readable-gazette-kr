@@ -1,8 +1,16 @@
 __pycache__/
 *.pyc
+node_modules/
 .DS_Store
 .venv/
 venv/
 *.swp
 .idea/
 .vscode/
+
+# secrets
+.env
+
+# local-only intermediate artifacts (not committed upstream either)
+raw-pdf/
+readable-final/

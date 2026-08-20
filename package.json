@@ -1,0 +1,12 @@
+{
+  "name": "ai-readable-gazette-kr-crawler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "crawl": "node scripts/crawl_gwanbo.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}
