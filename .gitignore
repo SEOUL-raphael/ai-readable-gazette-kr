@@ -14,3 +14,4 @@ venv/
 # local-only intermediate artifacts (not committed upstream either)
 raw-pdf/
 readable-final/
+logs/
